@@ -32,6 +32,8 @@ Viewer::Viewer()
              Gdk::BUTTON_PRESS_MASK      | 
              Gdk::BUTTON_RELEASE_MASK    |
              Gdk::VISIBILITY_NOTIFY_MASK);
+
+  reset_all();
 }
 
 Viewer::~Viewer()
@@ -39,11 +41,25 @@ Viewer::~Viewer()
   // Nothing to do here right now.
 }
 
+void Viewer::reset_all() {
+  DEBUG_MSG("reset all");
+  m_trackballTranslation = Matrix4x4();//translation(Vector3D(0.0, 0.0, -15.0));
+  m_trackballRotation = Matrix4x4();
+
+  m_lastMouse = Point2D();
+
+  invalidate();
+
+}
+
 void Viewer::invalidate()
 {
   // Force a rerender
   Gtk::Allocation allocation = get_allocation();
-  get_window()->invalidate_rect( allocation, false);
+
+  if (get_window()) {
+    get_window()->invalidate_rect( allocation, false);
+  }
 }
 
 void Viewer::on_realize()
@@ -63,6 +79,7 @@ void Viewer::on_realize()
   glShadeModel(GL_SMOOTH);
   glClearColor( 0.4, 0.4, 0.4, 0.0 );
   glEnable(GL_DEPTH_TEST);
+
 
   gldrawable->gl_end();
 }
@@ -90,8 +107,34 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Set up lighting
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+
+  GLfloat lightpos[] = {0.5f, 1.f, 10.f, 0.f};
+  glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
 
   // Draw stuff
+  GLfloat white[] = {0.8f, 0.8f, 0.8f, 1.0f};
+  GLfloat cyan[] = {0.f, .8f, .8f, 1.f};
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+  GLfloat shininess[] = {25};
+  glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+  glPushMatrix();
+
+    glLoadMatrixd(m_trackballTranslation.begin());
+    glPushMatrix();
+
+      glTranslated(0.0, 0.0, -10.0);
+
+      //glTranslated(0.0, 0.0, -20.0);
+      GLUquadricObj * quadric = gluNewQuadric();
+      gluSphere(quadric, 2.f, 30, 30);
+
+    glPopMatrix();
+
+  glPopMatrix();
 
   draw_trackball_circle();
 
@@ -132,19 +175,61 @@ bool Viewer::on_configure_event(GdkEventConfigure* event)
 
 bool Viewer::on_button_press_event(GdkEventButton* event)
 {
-  std::cerr << "Stub: Button " << event->button << " pressed" << std::endl;
+  DEBUG_MSG( "Stub: Button " << event->button << " pressed" );
+
+  // togle x,y,z based stuff
+  //m_mouseLastPos = event->x;
+
+  m_lastMouse = Point2D(event->x, event->y);
+
+  invalidate();
   return true;
 }
 
 bool Viewer::on_button_release_event(GdkEventButton* event)
 {
-  std::cerr << "Stub: Button " << event->button << " released" << std::endl;
+  DEBUG_MSG(" Stub: Button " << event->button << " released");
+
+  invalidate();
+
   return true;
 }
 
 bool Viewer::on_motion_notify_event(GdkEventMotion* event)
 {
-  std::cerr << "Stub: Motion at " << event->x << ", " << event->y << std::endl;
+  DEBUG_MSG("Stub: Motion at " << event->x << ", " << event->y );
+
+  Point2D dMouse(event->x - m_lastMouse[0], event->y - m_lastMouse[1]);
+
+  bool b1,b2,b3;
+  b1 = event->state & GDK_BUTTON1_MASK;
+  b2 = event->state & GDK_BUTTON2_MASK;
+  b3 = event->state & GDK_BUTTON3_MASK;
+
+  // do x,y translation
+  if (b1) {
+
+
+    Vector3D translate(dMouse[0] / 30.0, dMouse[1] / 23.0 , 0);
+
+    Matrix4x4 t = translation(translate);
+    m_trackballTranslation = m_trackballTranslation * t;
+
+  }
+
+  if (b2) {
+
+    Vector3D translate(0.0, 0.0, dMouse[1]/ 35.0);
+
+    Matrix4x4 t = translation(translate);
+    m_trackballTranslation = m_trackballTranslation * t;
+  }
+
+
+  DEBUG_MSG("trackballMatrix: " << m_trackballTranslation);
+  m_lastMouse = Point2D(event->x, event->y);
+
+  invalidate();
   return true;
 }
 

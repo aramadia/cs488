@@ -4,6 +4,15 @@
 #include <gtkmm.h>
 #include <gtkglmm.h>
 
+#include "algebra.hpp"
+
+#define MY_DEBUG
+#ifdef MY_DEBUG
+#define DEBUG_MSG(str) do { std::cout << str << std::endl; } while( false )
+#else
+#define DEBUG_MSG(str) do { } while ( false )
+#endif
+
 // The "main" OpenGL widget
 class Viewer : public Gtk::GL::DrawingArea {
 public:
@@ -15,6 +24,8 @@ public:
   // directly. Instead call this, which will cause an on_expose_event
   // call when the time is right.
   void invalidate();
+
+  void reset_all();
   
 protected:
 
@@ -42,6 +53,14 @@ protected:
   void draw_trackball_circle();
   
 private:
+
+  // view stuff
+  Matrix4x4 m_trackballTranslation;
+  Matrix4x4 m_trackballRotation;
+
+  Point2D m_lastMouse;
+
+
 };
 
 #endif
