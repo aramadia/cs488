@@ -1,0 +1,102 @@
+
+
+                            Interaction Demo 
+
+                            By Michael Hardy 
+
+                            August 12, 1993
+
+                            Updated on April 10, 1995 
+
+                            By Greg Veres
+
+
+Overview:
+---------
+
+   This program is designed to show you how complete translation and
+rotation control over a scene can be performed using the three mouse
+buttons and nothing else.  It uses pan and zoom tranmslations and
+introduces you to trackball-style rotations to give complete control
+over a scene.
+
+The Files:
+----------
+
+   The following files are contained in this directory:
+
+   * events.c events.h          - Routines for event processing and
+                                  scene drawing.
+
+   * trackball.c trackball.h    - Routines to provide trackball-style
+                                  rotations.
+
+   * intdemo.c intdemo.h        - The main routines for the
+                                  interaction demo.
+
+   * Makefile               	- The makefile for the demo for SGI machines.
+
+
+To Compile And Run The Program:
+-------------------------------
+
+Type 'make' on the Linux machines.  When you are done playing
+with the program, press 'Q' to quit. 
+
+
+Interaction:
+------------
+
+   There are three types of interaction that can be performed on the
+scene:
+
+   1. Pan Translations
+
+      Holding down the left mouse button and moving the mouse left and right
+      or up and down will move the scene in the direction that the mouse
+      is moved.
+
+   2. Zoom Translations
+
+      Holding down the middle mouse button and moving the mouse up will
+      "push" the scene away from the viewer and moving the mouse down
+      will "pull" the scene towards the viewer.
+
+   3. Trackball-Style Rotations
+
+      Holding down the right mouse button and moving the mouse will rotate
+      the scene using trackball rotations.  The best way to think of this
+      type of interaction is to pretend that the scene is in a large glass
+      sphere that is sticking out of the window.  The mouse can be thought
+      of as a hand that strokes the sphere.  Where and in what direction
+      the sphere is stroked will determine how the scene rotates.
+
+      Moving the mouse from left to right THROUGH THE CENTER OF THE 
+      WINDOW will rotate the scene from left to right.  
+
+      Moving the mouse from top to bottom THROUGH THE CENTER OF THE
+      WINDOW will rotate the scene from top to bottom.  
+
+      Moving the mouse from the upper right to the lower left
+      THROUGH THE CENTER OF THE WINDOW will rotate the back right corner of 
+      the scene up and over to the front left of the scene.  This is like
+      stroking the sphere from the upper right corner towards the lower
+      left corner.
+
+      Moving the mouse clockwise around the window WHILE STAYING NEAR
+      THE BORDER OF THE WINDOW will rotate the scene clockwise.  This
+      is like turning the sphere clockwise.
+
+      This is somewhat difficult to explain, but is should become clear
+      with a little experimentation.  Eventually, this type of 
+      interaction will feel very natural and you will wonder how 
+      you did without it all these years.
+
+      The trackball is half the size of the smallest of the window width
+      and window height.
+
+Michael Hardy
+August 12, 1993
+
+[Greg Veres
+April 10, 1995]
