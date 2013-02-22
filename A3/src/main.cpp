@@ -26,6 +26,9 @@ int main(int argc, char** argv)
   // Construct our (only) window
   AppWindow window;
 
+  // Set the root node for the viewer
+  window.getViewer().setSceneRoot(root);
+
   // And run the application!
   Gtk::Main::run(window);
 }

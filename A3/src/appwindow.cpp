@@ -8,12 +8,14 @@ AppWindow::AppWindow()
   // we'll set up next.
   using Gtk::Menu_Helpers::MenuElem;
   
+  using Gtk::Menu_Helpers::RadioMenuElem;
   using Gtk::Menu_Helpers::CheckMenuElem;
   // Set up the application menu
   // The slot we use here just causes AppWindow::hide() on this,
   // which shuts down the application.
 
   // Application Menu
+
 
   m_menu_app.items().push_back(MenuElem("Reset Pos_ition", Gtk::AccelKey("i"),
     sigc::mem_fun(*this, &AppWindow::hide)));
@@ -30,11 +32,14 @@ AppWindow::AppWindow()
 
   // Mode menu
 
+  sigc::slot1<void, Viewer::Mode> mode_slot = sigc::mem_fun(m_viewer, &Viewer::setMode);
 
-  m_menu_mode.items().push_back(MenuElem("_Position/Orientation", Gtk::AccelKey("p"),
-    sigc::mem_fun(*this, &AppWindow::hide)));
-  m_menu_mode.items().push_back(MenuElem("_Joints", Gtk::AccelKey("j"),
-    sigc::mem_fun(*this, &AppWindow::hide)));
+
+  Gtk::RadioButtonGroup modeGroup;
+  m_menu_mode.items().push_back(RadioMenuElem(modeGroup, "_Position/Orientation", Gtk::AccelKey("p"),
+    sigc::bind(mode_slot, Viewer::POSITION)));
+  m_menu_mode.items().push_back(RadioMenuElem(modeGroup, "_Joints", Gtk::AccelKey("j"),
+    sigc::bind(mode_slot, Viewer::JOINTS)));
 
   // Edit menu
   m_menu_edit.items().push_back(MenuElem("_Undo", Gtk::AccelKey("u"),
@@ -42,15 +47,17 @@ AppWindow::AppWindow()
   m_menu_edit.items().push_back(MenuElem("_Redot", Gtk::AccelKey("r"),
     sigc::mem_fun(*this, &AppWindow::hide)));
 
+  sigc::slot1<void, Viewer::Option> option_slot = sigc::mem_fun(m_viewer, &Viewer::toggleOption);
+
   // Options menu
   m_menu_option.items().push_back(CheckMenuElem("_Circle", Gtk::AccelKey("c"), 
-    sigc::mem_fun(*this, &AppWindow::hide)));
+    sigc::bind(option_slot, Viewer::CIRCLE)));
   m_menu_option.items().push_back(CheckMenuElem("_Z-buffer", Gtk::AccelKey("z"), 
-    sigc::mem_fun(*this, &AppWindow::hide)));
+    sigc::bind(option_slot, Viewer::ZBUFFER)));
   m_menu_option.items().push_back(CheckMenuElem("_Backface cull", Gtk::AccelKey("b"), 
-    sigc::mem_fun(*this, &AppWindow::hide)));
+    sigc::bind(option_slot, Viewer::BACK_CULL)));
   m_menu_option.items().push_back(CheckMenuElem("_Frontface cull", Gtk::AccelKey("f"), 
-    sigc::mem_fun(*this, &AppWindow::hide)));
+    sigc::bind(option_slot, Viewer::FRONT_CULL)));
 
   
 

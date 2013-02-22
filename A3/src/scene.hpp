@@ -28,6 +28,8 @@ public:
     m_invtrans = i;
   }
 
+  SceneNode *find(int id);
+
   void add_child(SceneNode* child)
   {
     m_children.push_back(child);
@@ -46,12 +48,17 @@ public:
 
   // Returns true if and only if this node is a JointNode
   virtual bool is_joint() const;
+
+  bool toggleSelected();
   
 protected:
+  static int s_idCounter;
   
   // Useful for picking
   int m_id;
   std::string m_name;
+
+  bool m_selected;
 
   // Transformations
   Matrix4x4 m_trans;

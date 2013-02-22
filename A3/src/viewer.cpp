@@ -5,7 +5,184 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-Viewer::Viewer()
+#include "scene.hpp"
+
+#include "debug.hpp"
+
+
+/*******************************************************
+ * 
+ * void vCalcRotVec(float fNewX, float fNewY, 
+ *                  float fOldX, float fOldY,
+ *                  float fDiameter,
+ *                  float *fVecX, float *fVecY, float *fVecZ);
+ *
+ *    Calculates a rotation vector based on mouse motion over
+ *    a virtual trackball.
+ *
+ *    The fNew and fOld mouse positions
+ *    should be in 'trackball' space. That is, they have been
+ *    transformed into a coordinate system centered at the middle
+ *    of the trackball. fNew, fOld, and fDiameter must all be specified
+ *    in the same units (pixels for example).
+ *
+ * Parameters: fNewX, fNewY - New mouse position in trackball space.
+ *                            This is the second point along direction
+ *                            of rotation.
+ *             fOldX, fOldY - Old mouse position in trackball space.
+ *                            This is the first point along direction
+ *                            of rotation.
+ *             fDiameter - Diameter of the trackball. This should
+ *                         be specified in the same units as fNew and fOld.
+ *                         (ie, usually pixels if fNew and fOld are transformed
+ *                         mouse positions)
+ *             fVec - The output rotation vector. The length of the vector
+ *                    is proportional to the angle of rotation.
+ *
+ *******************************************************/
+void vCalcRotVec(float fNewX, float fNewY,
+                 float fOldX, float fOldY,
+                 float fDiameter,
+                 float *fVecX, float *fVecY, float *fVecZ) {
+  
+   long  nXOrigin, nYOrigin;
+   float fNewVecX, fNewVecY, fNewVecZ,        /* Vector corresponding to new mouse location */
+         fOldVecX, fOldVecY, fOldVecZ,        /* Vector corresponding to old mouse location */
+         fLength;
+
+   /* Vector pointing from center of virtual trackball to
+    * new mouse position
+    */
+   fNewVecX    = fNewX * 2.0 / fDiameter;
+   fNewVecY    = fNewY * 2.0 / fDiameter;
+   fNewVecZ    = (1.0 - fNewVecX * fNewVecX - fNewVecY * fNewVecY);
+
+   /* If the Z component is less than 0, the mouse point
+    * falls outside of the trackball which is interpreted
+    * as rotation about the Z axis.
+    */
+   if (fNewVecZ < 0.0) {
+      fLength = sqrt(1.0 - fNewVecZ);
+      fNewVecZ  = 0.0;
+      fNewVecX /= fLength;
+      fNewVecY /= fLength;
+      DEBUG_MSG("inside trackball");
+   } else {
+      fNewVecZ = sqrt(fNewVecZ);
+   }
+
+   /* Vector pointing from center of virtual trackball to
+    * old mouse position
+    */
+   fOldVecX    = fOldX * 2.0 / fDiameter;
+   fOldVecY    = fOldY * 2.0 / fDiameter;
+   fOldVecZ    = (1.0 - fOldVecX * fOldVecX - fOldVecY * fOldVecY);
+ 
+   /* If the Z component is less than 0, the mouse point
+    * falls outside of the trackball which is interpreted
+    * as rotation about the Z axis.
+    */
+   if (fOldVecZ < 0.0) {
+      fLength = sqrt(1.0 - fOldVecZ);
+      fOldVecZ  = 0.0;
+      fOldVecX /= fLength;
+      fOldVecY /= fLength;
+   } else {
+      fOldVecZ = sqrt(fOldVecZ);
+   }
+
+   /* Generate rotation vector by calculating cross product:
+    * 
+    * fOldVec x fNewVec.
+    * 
+    * The rotation vector is the axis of rotation
+    * and is non-unit length since the length of a crossproduct
+    * is related to the angle between fOldVec and fNewVec which we need
+    * in order to perform the rotation.
+    */
+   *fVecX = fOldVecY * fNewVecZ - fNewVecY * fOldVecZ;
+   *fVecY = fOldVecZ * fNewVecX - fNewVecZ * fOldVecX;
+   *fVecZ = fOldVecX * fNewVecY - fNewVecX * fOldVecY;
+}
+
+/*******************************************************
+ * void vAxisRotMatrix(float fVecX, float fVecY, float fVecZ, Matrix mNewMat)
+ *    
+ *    Calculate the rotation matrix for rotation about an arbitrary axis.
+ *    
+ *    The axis of rotation is specified by (fVecX,fVecY,fVecZ). The length
+ *    of the vector is the amount to rotate by.
+ *
+ * Parameters: fVecX,fVecY,fVecZ - Axis of rotation
+ *             mNewMat - Output matrix of rotation in column-major format
+ *                       (ie, translation components are in column 3 on rows
+ *                       0,1, and 2).
+ *
+ *******************************************************/
+Matrix4x4 vAxisRotMatrix(float fVecX, float fVecY, float fVecZ) {
+
+
+    float fRadians, fInvLength, fNewVecX, fNewVecY, fNewVecZ;
+
+    /* Find the length of the vector which is the angle of rotation
+     * (in radians)
+     */
+    fRadians = sqrt(fVecX * fVecX + fVecY * fVecY + fVecZ * fVecZ);
+
+    /* If the vector has zero length - return the identity matrix */
+    if (fRadians > -0.000001 && fRadians < 0.000001) {
+        
+        return Matrix4x4();
+    }
+
+    /* Normalize the rotation vector now in preparation for making
+     * rotation matrix. 
+     */
+    fInvLength = 1 / fRadians;
+    fNewVecX   = fVecX * fInvLength;
+    fNewVecY   = fVecY * fInvLength;
+    fNewVecZ   = fVecZ * fInvLength;
+
+    /* Create the arbitrary axis rotation matrix */
+    double dSinAlpha = sin(fRadians);
+    double dCosAlpha = cos(fRadians);
+    double dT = 1 - dCosAlpha;
+
+    Matrix4x4 mNewMat;
+
+    mNewMat[0][0] = dCosAlpha + fNewVecX*fNewVecX*dT;
+    mNewMat[0][1] = fNewVecX*fNewVecY*dT + fNewVecZ*dSinAlpha;
+    mNewMat[0][2] = fNewVecX*fNewVecZ*dT - fNewVecY*dSinAlpha;
+    mNewMat[0][3] = 0;
+
+
+
+    mNewMat[1][0] = fNewVecX*fNewVecY*dT - dSinAlpha*fNewVecZ;
+    mNewMat[1][1] = dCosAlpha + fNewVecY*fNewVecY*dT;
+    mNewMat[1][2] = fNewVecY*fNewVecZ*dT + dSinAlpha*fNewVecX;
+    mNewMat[1][3] = 0;
+
+    mNewMat[2][0] = fNewVecZ*fNewVecX*dT + dSinAlpha*fNewVecY;
+    mNewMat[2][1] = fNewVecZ*fNewVecY*dT - dSinAlpha*fNewVecX;
+    mNewMat[2][2] = dCosAlpha + fNewVecZ*fNewVecZ*dT;
+    mNewMat[2][3] = 0;
+
+    mNewMat[3][0] = 0;
+    mNewMat[3][1] = 0;
+    mNewMat[3][2] = 0;
+    mNewMat[3][3] = 1;
+
+    return mNewMat;
+}
+
+
+
+Viewer::Viewer():
+  m_mode(POSITION),
+  m_drawCircle(false),
+  m_frontCull(false),
+  m_backCull(false),
+  m_zBuffer(false)
 {
   Glib::RefPtr<Gdk::GL::Config> glconfig;
 
@@ -43,13 +220,42 @@ Viewer::~Viewer()
 
 void Viewer::reset_all() {
   DEBUG_MSG("reset all");
-  m_trackballTranslation = Matrix4x4();//translation(Vector3D(0.0, 0.0, -15.0));
+  m_trackballTranslation = translation(Vector3D(0.0, 0.0, -5.0));
   m_trackballRotation = Matrix4x4();
 
   m_lastMouse = Point2D();
 
+  // invalidate other options?
+
   invalidate();
 
+}
+
+
+void Viewer::setMode(Mode mode) {
+  m_mode = mode;
+  DEBUG_MSG("SetMode: " << m_mode);
+}
+void Viewer::toggleOption(Option option) {
+  DEBUG_MSG("ToggleOption: " << option);
+  switch (option) {
+  case CIRCLE:
+    m_drawCircle = !m_drawCircle;
+    DEBUG_MSG("Draw Circle: " << m_drawCircle);
+    break;  
+  
+  case ZBUFFER:
+    m_zBuffer = !m_zBuffer;
+    break;
+  case BACK_CULL:
+    m_backCull = !m_backCull;
+    break;
+  case FRONT_CULL:
+    m_frontCull = !m_frontCull;
+    break;
+  }
+
+  invalidate();
 }
 
 void Viewer::invalidate()
@@ -93,6 +299,9 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   if (!gldrawable->gl_begin(get_gl_context()))
     return false;
 
+  //glEnable(GL_CULL_FACE);
+  //glCullFace(GL_FRONT);
+
   // Set up for perspective drawing 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -110,33 +319,69 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
 
+  // put light behind camera
   GLfloat lightpos[] = {0.5f, 1.f, 10.f, 0.f};
   glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
 
-  // Draw stuff
-  GLfloat white[] = {0.8f, 0.8f, 0.8f, 1.0f};
-  GLfloat cyan[] = {0.f, .8f, .8f, 1.f};
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, white);
-  GLfloat shininess[] = {25};
-  glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+  glEnable(GL_NORMALIZE);
+
+  // toogle options
+  DEBUG_MSG("Front/Back Cull " << m_frontCull << "/" << m_backCull << " Zbuf " << m_zBuffer);
+  if (m_frontCull || m_backCull) {
+    glEnable(GL_CULL_FACE);
+    if (m_backCull && m_frontCull) {
+      glCullFace(GL_FRONT_AND_BACK);
+    }
+    else if (m_frontCull) {
+      glCullFace(GL_FRONT);
+    }
+    else {
+      glCullFace(GL_BACK);
+    }
+  }
+  else {
+    glDisable(GL_CULL_FACE);
+  }
+  if (m_zBuffer) {
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(true);
+  }
+  else {
+    glDisable(GL_DEPTH_TEST);
+  }
+
 
   glPushMatrix();
 
-    glLoadMatrixd(m_trackballTranslation.begin());
-    glPushMatrix();
+    //Matrix4x4 daT = translation(Vector3D(5.0, 0.0, 0.0));
+    //glMultMatrixd(daT.transpose().begin());
 
-      glTranslated(0.0, 0.0, -10.0);
+    // gl use column order matrix, m4x4 is row order
+    Matrix4x4 trackballM = m_trackballTranslation * m_trackballRotation;
+    glMultMatrixd(trackballM.transpose().begin());
 
-      //glTranslated(0.0, 0.0, -20.0);
-      GLUquadricObj * quadric = gluNewQuadric();
-      gluSphere(quadric, 2.f, 30, 30);
+      // draw model
+    m_root->walk_gl(false);
 
-    glPopMatrix();
+
+    // glPushMatrix();
+
+    //   // push keep into screen
+    //   //glTranslated(0.0, 0.0, -10.0);
+
+    //   //glTranslated(0.0, 0.0, -20.0);
+    //   GLUquadricObj * quadric = gluNewQuadric();
+    //   gluSphere(quadric, 1.f, 10, 10);
+
+    // glPopMatrix();
 
   glPopMatrix();
 
-  draw_trackball_circle();
+
+
+  if (m_drawCircle) {
+    draw_trackball_circle();
+  }
 
   // Swap the contents of the front and back buffers so we see what we
   // just drew. This should only be done if double buffering is enabled.
@@ -182,6 +427,87 @@ bool Viewer::on_button_press_event(GdkEventButton* event)
 
   m_lastMouse = Point2D(event->x, event->y);
 
+  // pick here
+  if (m_mode == JOINTS) {
+
+    GLuint buffer[512];
+    GLint viewport[4];
+    glSelectBuffer (512, buffer);
+
+    // don't actually draw
+    glRenderMode(GL_SELECT);
+    glInitNames();  //init the name buffer
+
+    GLint hits;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+
+    //glViewport(0, 0, get_width(), get_height
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    for (int i = 0; i < 4; i++) {
+
+      DEBUG_MSG("Viewport[i]: " << viewport[i]);
+    }
+
+    gluPickMatrix(event->x, viewport[3] - event->y, 1, 1, viewport);
+    gluPerspective(40.0, (GLfloat)get_width()/(GLfloat)get_height(), 0.1, 1000.0);
+
+  // change to model view for drawing
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glPushMatrix();
+
+    //Matrix4x4 daT = translation(Vector3D(5.0, 0.0, 0.0));
+    //glMultMatrixd(daT.transpose().begin());
+
+    // gl use column order matrix, m4x4 is row order
+    Matrix4x4 trackballM = m_trackballTranslation * m_trackballRotation;
+    glMultMatrixd(trackballM.transpose().begin());
+
+      // draw model
+    m_root->walk_gl(true);
+
+    glPopMatrix();
+
+    hits = glRenderMode(GL_RENDER);
+
+    DEBUG_MSG("picked: " << hits << "==========================");
+
+    //parse the hits
+    int c = 0;  // buffer counter
+    for (int h = 0; h < hits; h++) {
+      int qStack = buffer[c++];
+      int minZ = buffer[c++];
+      int maxZ = buffer[c++];
+      DEBUG_MSG("HIT(" << h << ")" << qStack << " (" << minZ << "," << maxZ << ")");
+      for (int q = 0; q < qStack; q++) {
+        int id = buffer[c++];
+        DEBUG_MSG("\tname " << id);
+
+        SceneNode *selNode = m_root->find(id);
+        if (selNode == NULL) {
+                  *(int*)0=0;
+                  DEBUG_MSG("IMPOSSIBLE");
+                  exit(-1);
+        }
+
+        selNode->toggleSelected();
+      }
+
+    }
+
+    // select the primitives if they have joint owners
+    // when dragging, move the joints of the parents
+
+    // able to get GemeotryNode from id
+      // tree or global arraylist
+
+    // get parent from child
+  }
+
   invalidate();
   return true;
 }
@@ -210,7 +536,7 @@ bool Viewer::on_motion_notify_event(GdkEventMotion* event)
   if (b1) {
 
 
-    Vector3D translate(dMouse[0] / 30.0, dMouse[1] / 23.0 , 0);
+    Vector3D translate(dMouse[0] / 30.0, -dMouse[1] / 23.0 , 0);
 
     Matrix4x4 t = translation(translate);
     m_trackballTranslation = m_trackballTranslation * t;
@@ -225,8 +551,56 @@ bool Viewer::on_motion_notify_event(GdkEventMotion* event)
     m_trackballTranslation = m_trackballTranslation * t;
   }
 
+  if (b3) {
+    /*
+     * Track ball rotations are being used.
+     */
+   
+        float fDiameter;
+        int iCenterX, iCenterY;
+        float fNewModX, fNewModY, fOldModX, fOldModY;
+  
+        /* vCalcRotVec expects new and old positions in relation to the center of the
+         * trackball circle which is centered in the middle of the window and
+         * half the smaller of nWinWidth or nWinHeight.
+         */
+        fDiameter = (get_width() < get_height()) ? get_width() * 0.5 : get_height() * 0.5;
+        iCenterX = get_width() / 2;
+        iCenterY = get_height() / 2;
 
-  DEBUG_MSG("trackballMatrix: " << m_trackballTranslation);
+
+        fOldModX = m_lastMouse[0] - iCenterX;
+        fOldModY = m_lastMouse[1] - iCenterY;
+        fNewModX = event->x - iCenterX;
+        fNewModY = event->y - iCenterY;
+
+
+    float  fRotVecX, fRotVecY, fRotVecZ;
+
+        vCalcRotVec(fNewModX, fNewModY,
+                        fOldModX, fOldModY,
+                        fDiameter,
+                        &fRotVecX, &fRotVecY, &fRotVecZ);
+        /* Negate Y component since Y axis increases downwards
+         * in screen space and upwards in OpenGL.
+         */
+        Matrix4x4 mNewMat = vAxisRotMatrix(fRotVecX, -fRotVecY, fRotVecZ);
+
+        // Since all these matrices are meant to be loaded
+        // into the OpenGL matrix stack, we need to transpose the
+        // rotation matrix (since OpenGL wants rows stored
+        // in columns)
+
+        //vTransposeMatrix(mNewMat);
+        //vRightMultiply(mRotations, mNewMat);
+
+        m_trackballRotation = m_trackballRotation * mNewMat;
+    }
+  
+
+
+  DEBUG_MSG("trackballMatrix: Translation\n" << m_trackballTranslation <<
+    "Rotation\n" << m_trackballRotation);
   m_lastMouse = Point2D(event->x, event->y);
 
   invalidate();
@@ -269,4 +643,9 @@ void Viewer::draw_trackball_circle()
   glEnd();
   glColor3f(0.0, 0.0, 0.0);
   glDisable(GL_LINE_SMOOTH);
+}
+
+void Viewer::setSceneRoot(SceneNode *root) {
+  m_root = root;
+
 }

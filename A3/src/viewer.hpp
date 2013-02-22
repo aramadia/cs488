@@ -6,16 +6,27 @@
 
 #include "algebra.hpp"
 
-#define MY_DEBUG
-#ifdef MY_DEBUG
-#define DEBUG_MSG(str) do { std::cout << str << std::endl; } while( false )
-#else
-#define DEBUG_MSG(str) do { } while ( false )
-#endif
+
+
+
+class SceneNode;
 
 // The "main" OpenGL widget
 class Viewer : public Gtk::GL::DrawingArea {
 public:
+
+  enum Mode {
+    POSITION,
+    JOINTS
+  };
+
+  enum Option {
+    CIRCLE,
+    ZBUFFER,
+    BACK_CULL,
+    FRONT_CULL
+  };
+
   Viewer();
   virtual ~Viewer();
 
@@ -26,6 +37,12 @@ public:
   void invalidate();
 
   void reset_all();
+
+  void setSceneRoot(SceneNode *root);
+
+  // UI ELement control
+  void setMode(Mode mode);
+  void toggleOption(Option option);
   
 protected:
 
@@ -60,6 +77,14 @@ private:
 
   Point2D m_lastMouse;
 
+  SceneNode *m_root;
+
+  Mode m_mode;
+  bool m_drawCircle;
+
+  bool m_frontCull;
+  bool m_backCull;
+  bool m_zBuffer;
 
 };
 

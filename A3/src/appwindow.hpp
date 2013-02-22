@@ -7,6 +7,8 @@
 class AppWindow : public Gtk::Window {
 public:
   AppWindow();
+
+  Viewer &getViewer() { return m_viewer; }
   
 protected:
 
