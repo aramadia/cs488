@@ -14,29 +14,66 @@ blue = gr.material({0.0, 0.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 green = gr.material({0.0, 1.0, 0.0}, {0.1, 0.1, 0.1}, 10)
 white = gr.material({1.0, 1.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 
-s0 = gr.sphere('s0')
-rootnode:add_child(s0)
-s0:set_material(white)
+torso = gr.node('torso')
+	torsoP = gr.sphere('torsoP')
+	torsoP:set_material(white)
+	torsoP:scale(2.25, 3.0, 1.0)
+torso:add_child(torsoP)
+rootnode:add_child(torso)
 
-s1 = gr.sphere('s1')
-rootnode:add_child(s1)
-s1:scale(0.1, 2.0, 0.1)
-s1:set_material(red)
+shoulder =gr.node("shoulder")
+shoulder:translate(0.0, 2.75, 0.0)
+	shoulderP = gr.sphere('shoulderP')
+	shoulderP:scale(3.5, 0.5, 1.0)
+	shoulderP:set_material(green)
 
-s2 = gr.sphere('s2')
-rootnode:add_child(s2)
-s2:translate(2.0, -2.0, 0.0)
-s2:rotate('z', -90.0)
-s2:scale(0.1, 2.0, 0.1)
-s2:set_material(blue)
+shoulder:add_child(shoulderP)
 
-s3 = gr.sphere('s3')
-rootnode:add_child(s3)
-s3:scale(0.1, 0.1, 2.0)
-s3:translate(0.0, -20.0, 1.0)
-s3:set_material(green)
+torso:add_child(shoulder)
 
-rootnode:translate(-0.75, 0.25, -10.0)
-rootnode:rotate('y', -20.0)
+neck = gr.node('neck')
 
+neck:translate(0.0, 1.0, 0.0)
+	neckP = gr.sphere('neckP')
+	neckP:set_material(blue)
+	neckP:scale(0.5, 0.75, 0.5)
+neck:add_child(neckP)
+shoulder:add_child(neck)
+
+neckJoint = gr.joint('neckJoint', {-20.0, 0.0, 20.0}, {-90.0, 0.0, 90.0})
+neckJoint:translate(0.0, .75, 0.0)
+neck:add_child(neckJoint)
+
+head = gr.node('head')
+head:translate(0.0, .75, 0.0)
+	headP = gr.sphere('headP')
+	headP:set_material(white)
+	headP:scale(1.0, 1.5, 1.0)
+	nose = gr.sphere('gr')
+	nose:set_material(red)
+
+	nose:translate(0.0, 0.0, 1.0)
+	nose:scale(0.25, 0.25, 0.25)
+
+head:add_child(headP)
+head:add_child(nose)
+neckJoint:add_child(head)
+
+shoulderLJoint = gr.joint('shoulderLJoint', {-90.0, 0.0, 90.0}, {-5.0, 0.0, 5.0})
+shoulderLJoint:translate(-2.75, 0.0, 0.0)
+shoulder:add_child(shoulderLJoint)
+
+upperArmL = gr.node('upperArmL')
+upperArmL:translate(0.0, -2.5, 0.0)
+	upperArmLP = gr.sphere('upperArmLP')
+	upperArmLP:set_material(white)
+	upperArmLP:scale(0.4, 3.0, 1.0)
+upperArmL:add_child(upperArmLP)
+shoulderLJoint:add_child(upperArmL)
+
+
+
+
+
+rootnode:scale(0.20, 0.20, 0.20)
 return rootnode

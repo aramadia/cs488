@@ -21,8 +21,8 @@ void Sphere::walk_gl(bool picking) const
 	// draw the sphere
   GLUquadricObj * quadric = gluNewQuadric();
 
-	// gluQuadricNormals( quadric, GLU_SMOOTH );
-	// gluQuadricTexture( quadric, GL_TRUE );
-	// gluQuadricDrawStyle( quadric, GLU_FILL );
-  gluSphere(quadric, 1.f, 10, 10);
+	gluQuadricNormals( quadric, GLU_SMOOTH );
+	gluQuadricTexture( quadric, GL_TRUE );
+	gluQuadricDrawStyle( quadric, GLU_FILL );
+  gluSphere(quadric, 1.f, 30, 30);
 }

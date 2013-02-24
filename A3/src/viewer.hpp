@@ -86,6 +86,18 @@ private:
   bool m_backCull;
   bool m_zBuffer;
 
+  // selected nodes
+  std::list<SceneNode*> m_selected;
+
+
+  struct History {
+    int m_id;
+    double xRot, yRot;
+  };
+
+  std::stack<History> m_undo;
+  std::stack<History> m_redo;
+
 };
 
 #endif

@@ -152,6 +152,9 @@ Matrix4x4 rotation(double angle, char axis)
 
   Vector4D r1,r2,r3,r4;
 
+  // convert to radians
+  angle = angle * M_PI/ 180.0;
+
   double c = cos(angle);
   double s = sin(angle);
 
@@ -177,7 +180,7 @@ Matrix4x4 rotation(double angle, char axis)
       break;
   default:
     DEBUG_MSG("Unknown angle" << axis);
-
+    assert(false);
 
 
   }

@@ -33,11 +33,13 @@ public:
   void add_child(SceneNode* child)
   {
     m_children.push_back(child);
+    child->m_parent = this;
   }
 
   void remove_child(SceneNode* child)
   {
     m_children.remove(child);
+    child->m_parent = NULL;
   }
 
   // Callbacks to be implemented.
@@ -50,6 +52,12 @@ public:
   virtual bool is_joint() const;
 
   bool toggleSelected();
+
+  SceneNode *parent() { return m_parent; }
+  SceneNode *jointParent();
+  bool is_selected() { return m_selected; }
+
+  std::string name() const { return m_name; }
   
 protected:
   static int s_idCounter;
@@ -63,6 +71,8 @@ protected:
   // Transformations
   Matrix4x4 m_trans;
   Matrix4x4 m_invtrans;
+
+  SceneNode *m_parent;
 
   // Hierarchy
   typedef std::list<SceneNode*> ChildList;
@@ -81,8 +91,10 @@ public:
   void set_joint_x(double min, double init, double max);
   void set_joint_y(double min, double init, double max);
 
+  void rotate(double xDeg, double yDeg);
+
   struct JointRange {
-    double min, init, max;
+    double min, init, max, cur;
   };
 
   

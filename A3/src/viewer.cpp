@@ -302,6 +302,10 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   //glEnable(GL_CULL_FACE);
   //glCullFace(GL_FRONT);
 
+// blending
+  glEnable (GL_BLEND);
+glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   // Set up for perspective drawing 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -312,9 +316,9 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  // Clear framebuffer
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  // Clear framebuffer{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  
   // Set up lighting
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
@@ -322,6 +326,13 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   // put light behind camera
   GLfloat lightpos[] = {0.5f, 1.f, 10.f, 0.f};
   glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
+
+  GLfloat ambient[] = {0.2f, 0.2f, 0.2f, 1.f};
+  GLfloat diffuse[] = {0.8f, 0.8, 0.8f, 1.f};
+  GLfloat specular[] = {1.f, 1.f, 1.f, 1.f};
+  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 
   glEnable(GL_NORMALIZE);
 
@@ -348,6 +359,7 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   }
   else {
     glDisable(GL_DEPTH_TEST);
+    glDepthMask(false);
   }
 
 
@@ -422,13 +434,11 @@ bool Viewer::on_button_press_event(GdkEventButton* event)
 {
   DEBUG_MSG( "Stub: Button " << event->button << " pressed" );
 
-  // togle x,y,z based stuff
-  //m_mouseLastPos = event->x;
 
   m_lastMouse = Point2D(event->x, event->y);
 
   // pick here
-  if (m_mode == JOINTS) {
+  if (m_mode == JOINTS && event->button == 1) {
 
     GLuint buffer[512];
     GLint viewport[4];
@@ -494,7 +504,13 @@ bool Viewer::on_button_press_event(GdkEventButton* event)
                   exit(-1);
         }
 
-        selNode->toggleSelected();
+        bool selected = selNode->toggleSelected();
+        if (selected) {
+          m_selected.push_back(selNode);
+        }
+        else {
+          m_selected.remove(selNode);
+        }
       }
 
     }
@@ -532,75 +548,120 @@ bool Viewer::on_motion_notify_event(GdkEventMotion* event)
   b2 = event->state & GDK_BUTTON2_MASK;
   b3 = event->state & GDK_BUTTON3_MASK;
 
-  // do x,y translation
-  if (b1) {
+  //track ball mode
+  if (m_mode == POSITION) {
+    // do x,y translation
+    if (b1) {
 
+      double translationScale = 50.0;
 
-    Vector3D translate(dMouse[0] / 30.0, -dMouse[1] / 23.0 , 0);
+      Vector3D translate(dMouse[0] / translationScale, -dMouse[1] / translationScale , 0);
 
-    Matrix4x4 t = translation(translate);
-    m_trackballTranslation = m_trackballTranslation * t;
+      Matrix4x4 t = translation(translate);
+      m_trackballTranslation = m_trackballTranslation * t;
 
-  }
-
-  if (b2) {
-
-    Vector3D translate(0.0, 0.0, dMouse[1]/ 35.0);
-
-    Matrix4x4 t = translation(translate);
-    m_trackballTranslation = m_trackballTranslation * t;
-  }
-
-  if (b3) {
-    /*
-     * Track ball rotations are being used.
-     */
-   
-        float fDiameter;
-        int iCenterX, iCenterY;
-        float fNewModX, fNewModY, fOldModX, fOldModY;
-  
-        /* vCalcRotVec expects new and old positions in relation to the center of the
-         * trackball circle which is centered in the middle of the window and
-         * half the smaller of nWinWidth or nWinHeight.
-         */
-        fDiameter = (get_width() < get_height()) ? get_width() * 0.5 : get_height() * 0.5;
-        iCenterX = get_width() / 2;
-        iCenterY = get_height() / 2;
-
-
-        fOldModX = m_lastMouse[0] - iCenterX;
-        fOldModY = m_lastMouse[1] - iCenterY;
-        fNewModX = event->x - iCenterX;
-        fNewModY = event->y - iCenterY;
-
-
-    float  fRotVecX, fRotVecY, fRotVecZ;
-
-        vCalcRotVec(fNewModX, fNewModY,
-                        fOldModX, fOldModY,
-                        fDiameter,
-                        &fRotVecX, &fRotVecY, &fRotVecZ);
-        /* Negate Y component since Y axis increases downwards
-         * in screen space and upwards in OpenGL.
-         */
-        Matrix4x4 mNewMat = vAxisRotMatrix(fRotVecX, -fRotVecY, fRotVecZ);
-
-        // Since all these matrices are meant to be loaded
-        // into the OpenGL matrix stack, we need to transpose the
-        // rotation matrix (since OpenGL wants rows stored
-        // in columns)
-
-        //vTransposeMatrix(mNewMat);
-        //vRightMultiply(mRotations, mNewMat);
-
-        m_trackballRotation = m_trackballRotation * mNewMat;
     }
-  
+
+    if (b2) {
+
+      Vector3D translate(0.0, 0.0, dMouse[1]/ 35.0);
+
+      Matrix4x4 t = translation(translate);
+      m_trackballTranslation = m_trackballTranslation * t;
+    }
+
+    if (b3) {
+      /*
+       * Track ball rotations are being used.
+       */
+     
+          float fDiameter;
+          int iCenterX, iCenterY;
+          float fNewModX, fNewModY, fOldModX, fOldModY;
+    
+          /* vCalcRotVec expects new and old positions in relation to the center of the
+           * trackball circle which is centered in the middle of the window and
+           * half the smaller of nWinWidth or nWinHeight.
+           */
+          fDiameter = (get_width() < get_height()) ? (float)get_width() * 0.5f : (float)get_height() * 0.5f;
+          iCenterX = get_width() / 2;
+          iCenterY = get_height() / 2;
 
 
-  DEBUG_MSG("trackballMatrix: Translation\n" << m_trackballTranslation <<
-    "Rotation\n" << m_trackballRotation);
+          fOldModX = m_lastMouse[0] - iCenterX;
+          fOldModY = m_lastMouse[1] - iCenterY;
+          fNewModX = event->x - iCenterX;
+          fNewModY = event->y - iCenterY;
+
+
+      float  fRotVecX, fRotVecY, fRotVecZ;
+
+          vCalcRotVec(fNewModX, fNewModY,
+                          fOldModX, fOldModY,
+                          fDiameter,
+                          &fRotVecX, &fRotVecY, &fRotVecZ);
+          /* Negate Y component since Y axis increases downwards
+           * in screen space and upwards in OpenGL.
+           */
+          Matrix4x4 mNewMat = vAxisRotMatrix(fRotVecX, -fRotVecY, fRotVecZ);
+
+          // Since all these matrices are meant to be loaded
+          // into the OpenGL matrix stack, we need to transpose the
+          // rotation matrix (since OpenGL wants rows stored
+          // in columns)
+
+          //vTransposeMatrix(mNewMat);
+          //vRightMultiply(mRotations, mNewMat);
+
+          m_trackballRotation = m_trackballRotation * mNewMat;
+      }
+    
+
+
+    DEBUG_MSG("trackballMatrix: Translation\n" << m_trackballTranslation <<
+      "Rotation\n" << m_trackballRotation);
+  }
+  else {
+    // JOINT manipulation mode
+
+    // rotate head up down relative to y when b2
+    // rotate head left right with x motion when b3
+
+    // grab all selected nodes
+    // grab their parents
+    // rotate their joint left/right, up/down
+
+     for (std::list<SceneNode*>::const_iterator it = m_selected.begin(), end = m_selected.end(); it != end; ++it) {
+     
+      assert((*it)->is_selected());
+      
+      SceneNode *parent = (*it)->jointParent();
+
+      // check if parent is joint node
+      
+      DEBUG_MSG("Rotating: " << (*it)->name());
+      assert(parent);
+      DEBUG_MSG("Parent: name " << parent->name());
+      assert(parent->is_joint());
+      JointNode *joint = dynamic_cast<JointNode*>(parent);
+      assert(joint);
+
+      double rotationScale = -3.0;
+      
+      if (b2) {
+        // rotate in degrees
+        joint->rotate( dMouse[1] / rotationScale, 0.0);
+      }
+
+      if (b3) {
+        joint->rotate(0.0, dMouse[0] / rotationScale);
+      }
+
+
+    }
+
+  }
+
   m_lastMouse = Point2D(event->x, event->y);
 
   invalidate();
