@@ -170,13 +170,13 @@ void JointNode::walk_gl(bool picking) const
     glMultMatrixd(finalTrans.transpose().begin());
 
     // draw the joint for fun and profit
-    jointDebugMaterial.apply_gl();
-      GLUquadricObj * quadric = gluNewQuadric();
+    // jointDebugMaterial.apply_gl();
+    //   GLUquadricObj * quadric = gluNewQuadric();
 
-    gluQuadricNormals( quadric, GLU_SMOOTH );
-    gluQuadricTexture( quadric, GL_TRUE );
-    gluQuadricDrawStyle( quadric, GLU_FILL );
-    gluSphere(quadric, 0.25f, 30, 30);
+    // gluQuadricNormals( quadric, GLU_SMOOTH );
+    // gluQuadricTexture( quadric, GL_TRUE );
+    // gluQuadricDrawStyle( quadric, GLU_FILL );
+    // gluSphere(quadric, 0.25f, 30, 30);
 
     for (ChildList::const_iterator it = m_children.begin(), end = m_children.end(); it != end; ++it) {
       (*it)->walk_gl(picking);

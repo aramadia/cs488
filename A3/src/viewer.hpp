@@ -97,6 +97,11 @@ private:
   bool m_zBuffer;
 
   // selected nodes
+  struct NodeRotation
+  {
+    SceneNode *node;
+    double xRot, yRot;
+  };
   std::list<SceneNode*> m_selected;
 
 

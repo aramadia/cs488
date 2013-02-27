@@ -5,6 +5,8 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include <gtkmm/messagedialog.h>
+
 #include "scene.hpp"
 
 #include "debug.hpp"
@@ -295,6 +297,13 @@ void Viewer::toggleOption(Option option) {
 }
 
 void Viewer::undo() {
+
+  if (m_undo.empty()) {
+    Gtk::MessageDialog dialog("Can't undo");
+    dialog.run();
+    return;
+  }
+
   History record = m_undo.top();
   m_undo.pop();
 
@@ -313,6 +322,13 @@ void Viewer::undo() {
 }
 
 void Viewer::redo() {
+
+  if (m_redo.empty()) {
+    Gtk::MessageDialog dialog("Can't redo");
+    dialog.run();
+    return;
+  }
+
   History record = m_redo.top();
   m_redo.pop();
 
@@ -610,7 +626,7 @@ bool Viewer::on_button_release_event(GdkEventButton* event)
 
   // save state
   if (m_mode == JOINTS) {
-    
+
     // save to undo stack
 
   }
