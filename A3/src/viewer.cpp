@@ -45,7 +45,7 @@ void vCalcRotVec(float fNewX, float fNewY,
                  float fDiameter,
                  float *fVecX, float *fVecY, float *fVecZ) {
   
-   long  nXOrigin, nYOrigin;
+
    float fNewVecX, fNewVecY, fNewVecZ,        /* Vector corresponding to new mouse location */
          fOldVecX, fOldVecY, fOldVecZ,        /* Vector corresponding to old mouse location */
          fLength;
@@ -178,6 +178,7 @@ Matrix4x4 vAxisRotMatrix(float fVecX, float fVecY, float fVecZ) {
 
 
 Viewer::Viewer():
+  m_root(NULL),
   m_mode(POSITION),
   m_drawCircle(false),
   m_frontCull(false),
@@ -210,7 +211,7 @@ Viewer::Viewer():
              Gdk::BUTTON_RELEASE_MASK    |
              Gdk::VISIBILITY_NOTIFY_MASK);
 
-  reset_all();
+  reset(RESET_ALL);
 }
 
 Viewer::~Viewer()
@@ -218,10 +219,45 @@ Viewer::~Viewer()
   // Nothing to do here right now.
 }
 
-void Viewer::reset_all() {
+void Viewer::reset(ResetType type) {
   DEBUG_MSG("reset all");
-  m_trackballTranslation = translation(Vector3D(0.0, 0.0, -5.0));
-  m_trackballRotation = Matrix4x4();
+
+  bool resetPos = false, resetOri = false, resetJoint = false;
+  switch(type) {
+  case RESET_POSITION:
+    resetPos = true;
+    break;
+  case RESET_ORIENTATION:
+    resetOri = true;
+    break;
+  case RESET_JOINTS:
+    resetJoint = true;
+    break;
+  case RESET_ALL:
+    resetPos = true;
+    resetOri = true;
+    resetJoint = true;
+    break;
+
+  }
+
+  if (resetPos) {
+
+    m_trackballTranslation = translation(Vector3D(0.0, 0.0, -5.0));
+  }
+  if (resetOri) {
+
+    m_trackballRotation = Matrix4x4();
+  }
+  if (resetJoint) {
+    if (m_root) {
+      m_root->resetJoints();
+    }
+
+    m_undo = HistoryStack();
+    m_redo = HistoryStack();
+    m_selected.clear();
+  }
 
   m_lastMouse = Point2D();
 
@@ -256,6 +292,42 @@ void Viewer::toggleOption(Option option) {
   }
 
   invalidate();
+}
+
+void Viewer::undo() {
+  History record = m_undo.top();
+  m_undo.pop();
+
+  // execute that record
+  SceneNode *node = m_root->find(record.id);
+  assert(node);
+  assert(node->is_joint());
+  JointNode *joint = dynamic_cast<JointNode*>(node);
+  assert(joint);
+
+  joint->joint_x() = record.xRot;
+  joint->joint_y() = record.yRot;
+
+
+  m_redo.push(record);
+}
+
+void Viewer::redo() {
+  History record = m_redo.top();
+  m_redo.pop();
+
+    // execute that record
+  SceneNode *node = m_root->find(record.id);
+  assert(node);
+  assert(node->is_joint());
+  JointNode *joint = dynamic_cast<JointNode*>(node);
+  assert(joint);
+
+  joint->joint_x() = record.xRot;
+  joint->joint_y() = record.yRot;
+
+
+  m_undo.push(record);
 }
 
 void Viewer::invalidate()
@@ -504,12 +576,16 @@ bool Viewer::on_button_press_event(GdkEventButton* event)
                   exit(-1);
         }
 
-        bool selected = selNode->toggleSelected();
-        if (selected) {
-          m_selected.push_back(selNode);
-        }
-        else {
-          m_selected.remove(selNode);
+        // check if selNode is selectable (has a joint parent)
+        if (selNode->jointParent()) {
+
+          bool selected = selNode->toggleSelected();
+          if (selected) {
+            m_selected.push_back(selNode);
+          }
+          else {
+            m_selected.remove(selNode);
+          }
         }
       }
 
@@ -531,6 +607,13 @@ bool Viewer::on_button_press_event(GdkEventButton* event)
 bool Viewer::on_button_release_event(GdkEventButton* event)
 {
   DEBUG_MSG(" Stub: Button " << event->button << " released");
+
+  // save state
+  if (m_mode == JOINTS) {
+    
+    // save to undo stack
+
+  }
 
   invalidate();
 

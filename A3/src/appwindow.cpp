@@ -17,16 +17,19 @@ AppWindow::AppWindow()
   // Application Menu
 
 
+  sigc::slot1<void, Viewer::ResetType> reset_slot = sigc::mem_fun(m_viewer, &Viewer::reset);
+
+
   m_menu_app.items().push_back(MenuElem("Reset Pos_ition", Gtk::AccelKey("i"),
-    sigc::mem_fun(*this, &AppWindow::hide)));
+    sigc::bind(reset_slot, Viewer::RESET_POSITION)));
 
   m_menu_app.items().push_back(MenuElem("Reset _Orientation", Gtk::AccelKey("o"),
-    sigc::mem_fun(*this, &AppWindow::hide)));
+   sigc::bind(reset_slot, Viewer::RESET_ORIENTATION)));
 
   m_menu_app.items().push_back(MenuElem("Reset Joi_nts", Gtk::AccelKey("n"),
-    sigc::mem_fun(*this, &AppWindow::hide)));
+    sigc::bind(reset_slot, Viewer::RESET_JOINTS)));
   m_menu_app.items().push_back(MenuElem("Reset _All", Gtk::AccelKey("a"),
-    sigc::mem_fun(m_viewer, &Viewer::reset_all)));
+    sigc::bind(reset_slot, Viewer::RESET_ALL)));
   m_menu_app.items().push_back(MenuElem("_Quit", Gtk::AccelKey("q"),
     sigc::mem_fun(*this, &AppWindow::hide)));
 
@@ -43,9 +46,9 @@ AppWindow::AppWindow()
 
   // Edit menu
   m_menu_edit.items().push_back(MenuElem("_Undo", Gtk::AccelKey("u"),
-    sigc::mem_fun(*this, &AppWindow::hide)));
+    sigc::mem_fun(m_viewer, &Viewer::undo)));
   m_menu_edit.items().push_back(MenuElem("_Redot", Gtk::AccelKey("r"),
-    sigc::mem_fun(*this, &AppWindow::hide)));
+    sigc::mem_fun(m_viewer, &Viewer::redo)));
 
   sigc::slot1<void, Viewer::Option> option_slot = sigc::mem_fun(m_viewer, &Viewer::toggleOption);
 

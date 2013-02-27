@@ -57,6 +57,9 @@ public:
   SceneNode *jointParent();
   bool is_selected() { return m_selected; }
 
+  // reset all joints underneath this node
+  virtual void resetJoints();
+
   std::string name() const { return m_name; }
   
 protected:
@@ -92,10 +95,15 @@ public:
   void set_joint_y(double min, double init, double max);
 
   void rotate(double xDeg, double yDeg);
+  virtual void resetJoints();
 
   struct JointRange {
     double min, init, max, cur;
   };
+
+
+  double &joint_x() { return m_joint_x.cur; }
+  double &joint_y() { return m_joint_y.cur; }
 
   
 protected:

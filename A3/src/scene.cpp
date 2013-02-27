@@ -87,6 +87,32 @@ SceneNode *SceneNode::jointParent() {
   return NULL;
 }
 
+
+void SceneNode::resetJoints() {
+      
+  m_selected = false;
+  for (ChildList::const_iterator it = m_children.begin(), end = m_children.end(); it != end; ++it) {
+    (*it)->resetJoints();
+  }
+
+}
+
+void JointNode::resetJoints() {
+ 
+  m_joint_x.cur = m_joint_x.init;
+  m_joint_y.cur = m_joint_y.cur;
+  
+  m_selected = false;
+
+  for (ChildList::const_iterator it = m_children.begin(), end = m_children.end(); it != end; ++it) {
+    (*it)->resetJoints();
+  }
+
+
+
+}
+
+
 void SceneNode::rotate(char axis, double angle)
 {
   DEBUG_MSG( "SceneNode:Rotate " << m_name << " around " << axis << " by " << angle );

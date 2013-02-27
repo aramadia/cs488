@@ -27,6 +27,13 @@ public:
     FRONT_CULL
   };
 
+  enum ResetType {
+    RESET_POSITION,
+    RESET_ORIENTATION,
+    RESET_JOINTS,
+    RESET_ALL
+  };
+
   Viewer();
   virtual ~Viewer();
 
@@ -36,7 +43,10 @@ public:
   // call when the time is right.
   void invalidate();
 
-  void reset_all();
+  void reset(ResetType type);
+
+  void undo();
+  void redo();
 
   void setSceneRoot(SceneNode *root);
 
@@ -91,12 +101,13 @@ private:
 
 
   struct History {
-    int m_id;
+    int id;
     double xRot, yRot;
   };
 
-  std::stack<History> m_undo;
-  std::stack<History> m_redo;
+  typedef std::stack<History> HistoryStack;
+  HistoryStack m_undo;
+  HistoryStack m_redo;
 
 };
 

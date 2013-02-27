@@ -20,6 +20,7 @@ $(MAIN): $(OBJECTS)
 	@echo Creating $@...
 	@$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
 	cp $(MAIN) ../$(MAIN)
+	cp puppet.lua ../puppet.lua
 
 %.o: %.cpp
 	@echo Compiling $<...
