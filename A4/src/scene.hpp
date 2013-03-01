@@ -6,8 +6,12 @@
 #include "primitive.hpp"
 #include "material.hpp"
 
+
+
 class SceneNode {
 public:
+
+  typedef std::list<SceneNode*> ChildList;
   SceneNode(const std::string& name);
   virtual ~SceneNode();
 
@@ -44,6 +48,11 @@ public:
 
   // Returns true if and only if this node is a JointNode
   virtual bool is_joint() const;
+
+
+  ChildList &children() { return m_children; }
+
+  std::string name() const { return m_name; }
   
 protected:
   
@@ -56,7 +65,6 @@ protected:
   Matrix4x4 m_invtrans;
 
   // Hierarchy
-  typedef std::list<SceneNode*> ChildList;
   ChildList m_children;
 };
 
@@ -93,6 +101,8 @@ public:
   {
     m_material = material;
   }
+
+  Primitive *get_primitive() { return m_primitive; }
 
 protected:
   Material* m_material;

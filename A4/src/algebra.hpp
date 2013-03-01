@@ -127,6 +127,13 @@ public:
     v_[2] = other.v_[2];
   }
 
+  Vector3D(const Point3D &other) {
+    v_[0] = other[0];
+    v_[1] = other[1];
+    v_[2] = other[2];
+
+  }
+
   Vector3D& operator =(const Vector3D& other)
   {
     v_[0] = other.v_[0];

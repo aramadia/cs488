@@ -1,11 +1,14 @@
 SOURCES = $(wildcard *.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
-LDFLAGS = $(shell pkg-config --libs lua5.1) -llua5.1 -lpng
-CPPFLAGS = $(shell pkg-config --cflags lua5.1)
+LDFLAGS = $(shell pkg-config --libs lua) -llua -lpng -L/usr/local/opt/libpng/lib
+CPPFLAGS = $(shell pkg-config --cflags lua) -I/usr/local/opt/libpng/include
 CXXFLAGS = $(CPPFLAGS) -W -Wall -g
 CXX = g++
 MAIN = rt
+
+# replace lua with lua5.1
+# remove opt/libpng stuff
 
 all: $(MAIN)
 
