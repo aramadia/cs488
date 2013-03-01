@@ -47,17 +47,23 @@ void a4_render(// What to render
       // find the closest intersection
 
       double bestIntersection = -1;
+      GeometryNode *node = NULL;
+      Vector3D bestNormal;
       for (SceneNode::ChildList::const_iterator it = root->children().begin(), end = root->children().end(); it != end; ++it) {
         //DEBUG_MSG((*it)->name());
         GeometryNode *geoNode = dynamic_cast<GeometryNode*>(*it);
         assert(geoNode);
         NonhierSphere * sphere = dynamic_cast<NonhierSphere*>(geoNode->get_primitive());
         assert(sphere);
-        double t = sphere->intersect(rayOrigin, rayDirection);
+        Vector3D normal;
+        double t = sphere->intersect(rayOrigin, rayDirection, normal);
 
         if (t > 0) {
-          if (bestIntersection < 0) bestIntersection = t;
-          else if (t < bestIntersection) bestIntersection = t;
+          if (bestIntersection < 0 || t < bestIntersection) {
+            bestIntersection = t;
+            node = geoNode;
+            bestNormal = normal;
+          }
         }
 
       }
@@ -68,7 +74,7 @@ void a4_render(// What to render
 
       // Set the color
 
-
+      // show background
       if (bestIntersection < 0) {
 
         // Red: increasing from top to bottom
@@ -80,9 +86,28 @@ void a4_render(// What to render
                         || (y >= height/2 && x >= height/2)) ? 1.0 : 0.0;
       }
       else {
-        img(x,y,0) = 0.0;
-        img(x,y,1) = 0.0;
-        img(x,y,2) = 0.0;
+
+        Vector3D color;
+        //calculate lighting
+        for (std::list<Light*>::const_iterator it = lights.begin(), end = lights.end(); it != end; ++it) {
+          Light * l = *it;
+
+          //check if light is blocked by shadow
+          // float lambert = (lightRay.dir * n) * coef;
+
+          float lambert = (bestNormal.dot(rayDirection)) * 0.3f;
+          color[0] += lambert;
+          color[1] += lambert;
+
+
+        }
+
+
+        DEBUG_MSG("x" << x << " y:" << y << " " << color);
+
+        img(x,y,0) = color[0];
+        img(x,y,1) = color[1];
+        img(x,y,2) = color[2];
 
       }
     }

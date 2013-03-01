@@ -9,7 +9,9 @@ Sphere::~Sphere()
 }
 
 
-float NonhierSphere::intersect(Vector3D rayOrigin, Vector3D rayDirection) {
+float NonhierSphere::intersect(Vector3D rayOrigin, Vector3D rayDirection, 
+    Vector3D &out_normal) {
+
 	Vector3D dist = Vector3D(m_pos) - rayOrigin; 
 	double B = rayDirection.dot( dist);
 	double D = B*B - dist.dot( dist) + m_radius * m_radius; 
@@ -30,6 +32,14 @@ float NonhierSphere::intersect(Vector3D rayOrigin, Vector3D rayDirection) {
 	{
 	    retValue = t1;
 	}
+
+
+	if (retValue > 0) {
+		Vector3D intersection = rayOrigin + rayDirection * retValue;
+		out_normal = m_pos - intersection;
+		out_normal.normalize();
+	}
+
 	return retValue;
 }
 

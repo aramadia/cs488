@@ -183,6 +183,10 @@ inline Vector3D operator *(double s, const Vector3D& v)
 {
   return Vector3D(s*v[0], s*v[1], s*v[2]);
 }
+inline Vector3D operator *(const Vector3D& v, double s)
+{
+  return Vector3D(s*v[0], s*v[1], s*v[2]);
+}
 
 inline Vector3D operator +(const Vector3D& a, const Vector3D& b)
 {
