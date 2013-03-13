@@ -12,17 +12,7 @@ public:
   virtual Intersection intersect(Ray ray) = 0;
 };
 
-class Sphere : public Primitive {
-public:
-  virtual ~Sphere();
-  virtual Intersection intersect(Ray ray);
-};
 
-class Cube : public Primitive {
-public:
-  virtual ~Cube();
-  virtual Intersection intersect(Ray ray);
-};
 
 class NonhierSphere : public Primitive {
 public:
@@ -38,6 +28,7 @@ private:
   double m_radius;
 };
 
+// Box is really a mesh
 class NonhierBox : public Primitive {
 public:
   NonhierBox(const Point3D& pos, double size);
@@ -49,6 +40,24 @@ private:
   Point3D m_pos;
   double m_size;
   Mesh *m_mesh;
+};
+
+class Sphere : public Primitive {
+public:
+	Sphere();
+  virtual ~Sphere();
+  virtual Intersection intersect(Ray ray);
+private:
+  NonhierSphere *m_sphere;
+};
+
+class Cube : public Primitive {
+public:
+	Cube();
+  virtual ~Cube();
+  virtual Intersection intersect(Ray ray);
+private:
+  NonhierBox *m_cube;
 };
 
 #endif

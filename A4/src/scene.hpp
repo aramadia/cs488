@@ -18,6 +18,9 @@ public:
   const Matrix4x4& get_transform() const { return m_trans; }
   const Matrix4x4& get_inverse() const { return m_invtrans; }
   
+
+  virtual Intersection intersect(Ray ray);
+
   void set_transform(const Matrix4x4& m)
   {
     m_trans = m;
@@ -103,6 +106,8 @@ public:
   }
 
   Primitive *get_primitive() { return m_primitive; }
+
+  virtual Intersection intersect(Ray ray);
 
 protected:
   Material* m_material;

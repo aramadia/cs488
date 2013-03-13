@@ -6,25 +6,33 @@ Primitive::~Primitive()
 {
 }
 
+Sphere::Sphere()
+{
+	m_sphere = new NonhierSphere(Point3D(0.0, 0.0, 0.0), 1.0);
+}
+
 Sphere::~Sphere()
 {
+	delete m_sphere;
 }
 
 Intersection Sphere::intersect(Ray ray) {
-	Intersection intersection;
-
-	return intersection;
+	return m_sphere->intersect(ray);
 }
 
+Cube::Cube()
+{
+	m_cube = new NonhierBox(Point3D(0,0,0), 1.0);
+
+}
 
 Cube::~Cube()
 {
+	delete m_cube;
 }
 
 Intersection Cube::intersect(Ray ray) {
-	Intersection intersection;
-
-	return intersection;
+	return m_cube->intersect(ray);
 }
 
 NonhierSphere::~NonhierSphere()
@@ -34,8 +42,6 @@ NonhierSphere::~NonhierSphere()
 
 Intersection NonhierSphere::intersect(Ray ray) {
 
-// float NonhierSphere::intersect(Vector3D rayOrigin, Vector3D rayDirection, 
-//     Vector3D &out_intersection, Vector3D &out_normal) {
 
 	Intersection intersection;
 

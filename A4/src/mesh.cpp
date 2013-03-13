@@ -52,6 +52,10 @@ Intersection intersectPolygon(Ray ray, std::vector<Vector3D> polygon)
 
   double num = planeNormal.dot(polygon[0] - ray.pos);
   double t = num/den;
+  if (t < 0.001)
+  {
+	  return intersection;
+  }
 
   // DEBUG_MSG("plane hit: " << t);
 
@@ -120,10 +124,14 @@ Intersection intersectPolygon(Ray ray, std::vector<Vector3D> polygon)
 //      index++;
 //    }
 
+  if (point_is_inside)
+  {
     intersection.hit =  point_is_inside;
     intersection.n = -1.0 * planeNormal;
 
     intersection.t = t;
+    //DEBUG_MSG("Hit mesh " << t);
+  }
     return intersection;
 
 }
@@ -132,7 +140,7 @@ Intersection intersectPolygon(Ray ray, std::vector<Vector3D> polygon)
 Intersection Mesh::intersect(Ray ray) {
   Intersection intersection;
 
-  DEBUG_MSG("Faces: " << m_faces.size());
+  //DEBUG_MSG("Vxs " << m_verts.size() << " Faces: " << m_faces.size() );
   // intersect ray polygon
   //for (SceneNode::ChildList::const_iterator it = root->children().begin(), end = root->children().end(); it != end; ++it) {
   for (std::vector<Face>::const_iterator it = m_faces.begin(), end = m_faces.end(); it != end; ++it)
@@ -152,11 +160,11 @@ Intersection Mesh::intersect(Ray ray) {
 
     if (pIntersect.hit)
     {
-      DEBUG_MSG("HIT");
+      //DEBUG_MSG("HIT");
       if (!intersection.hit || pIntersect.t < intersection.t )
       {
 
-        DEBUG_MSG("HIT SET");
+        //DEBUG_MSG("HIT SET");
         intersection = pIntersect;
       }
     }

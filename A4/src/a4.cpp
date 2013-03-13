@@ -76,27 +76,9 @@ void a4_render(
 			// find the closest intersection
 
 			Intersection intersection;
+			intersection = root->intersect(cameraRay);
 
-			for (SceneNode::ChildList::const_iterator it = root->children().begin(), end = root->children().end();
-					it != end; ++it)
-			{
-				//DEBUG_MSG((*it)->name());
-				GeometryNode *geoNode = dynamic_cast<GeometryNode*>(*it);
-				assert(geoNode);
 
-				Intersection i = geoNode->get_primitive()->intersect(cameraRay);
-
-				if (i.hit)
-				{
-					assert(i.t > 0);
-					if (!intersection.hit || i.t < intersection.t)
-					{
-						intersection = i;
-						intersection.mat = geoNode->get_material();
-					}
-				}
-
-			}
 
 			// given an intersection, compute if a light is visible
 			// compute the color based on the light
@@ -149,28 +131,22 @@ void a4_render(
 					const double distanceToLight = (intersection.pos - l->position).length();
 
 
-					for (SceneNode::ChildList::const_iterator shadowIt = root->children().begin(), end =
-							root->children().end(); shadowIt != end; ++shadowIt)
+					Intersection lightIntersection = root->intersect(lightRay);
+					if (lightIntersection.hit)
 					{
-						GeometryNode *geoNode = dynamic_cast<GeometryNode*>(*shadowIt);
-						assert(geoNode);
-
-						// check if the intersection happens
-						Intersection lightIntersection = geoNode->get_primitive()->intersect(lightRay);
-						if (lightIntersection.hit)
+						// check if the intersection happens before intersection.pos plus a buffer
+						if ((lightIntersection.pos - l->position).length() < distanceToLight - 0.001)
 						{
-							// check if the intersection happens before intersection.pos plus a buffer
-							if ((lightIntersection.pos - l->position).length() < distanceToLight - 0.001)
-							{
-								inShadow = true;
-								break;
-							}
+							inShadow = true;
 						}
 					}
+
+
 
 					// Don't process thist light
 					if (inShadow)
 					{
+						// TODO
 						continue;
 					}
 

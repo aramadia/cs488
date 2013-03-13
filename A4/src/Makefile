@@ -20,6 +20,7 @@ clean:
 $(MAIN): $(OBJECTS)
 	@echo Creating $@...
 	@$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+	cp $(MAIN) ../$(MAIN)
 
 %.o: %.cpp
 	@echo Compiling $<...
