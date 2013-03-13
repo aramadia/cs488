@@ -43,7 +43,7 @@ Intersection NonhierSphere::intersect(Ray ray) {
 	double B = ray.dir.dot( dist);
 	double D = B*B - dist.dot( dist) + m_radius * m_radius; 
 
-	if (D < 0.0f)  {
+	if (D < 0.0)  {
 	    return intersection;	// no intersection
 	}
 	double t0 = B - sqrt(D); 

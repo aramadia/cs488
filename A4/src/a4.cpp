@@ -35,7 +35,9 @@ void a4_render(
 	// Camera Model from http://courses.csusm.edu/cs697exz/camera.html
 
 	// convert fov to radians
-	fov = fov * M_PI / 180.0;
+	double fovy = fov * M_PI / 180.0;
+
+	const double aspect = (double)width/(double)height;
 
 	// Camera is pointing where?
 	Vector3D cameraDir = view;
@@ -51,8 +53,8 @@ void a4_render(
 	Vector3D cameraV = cameraU.cross(cameraDir);
 	cameraV.normalize();
 
-	Vector3D cameraDU = 2 * tan(fov / 2.0) / width * cameraU;
-	Vector3D cameraDV = 2 * tan(fov / 2.0) / height * cameraV;
+	Vector3D cameraDU = 2.0 * aspect * tan(fovy / 2.0) / (double)width * cameraU;
+	Vector3D cameraDV = 2.0 * tan(fovy / 2.0) / (double)height * cameraV;
 
 	// RHS coordinate system
 	Image img(width, height, 3);
@@ -130,9 +132,9 @@ void a4_render(
 				PhongMaterial *mat = dynamic_cast<PhongMaterial*>(m);
 				assert(mat);
 
-				for (std::list<Light*>::const_iterator it = lights.begin(), end = lights.end(); it != end; ++it)
+				for (std::list<Light*>::const_iterator lightIt = lights.begin(), end = lights.end(); lightIt != end; ++lightIt)
 				{
-					Light * l = *it;
+					Light * l = *lightIt;
 
 					//diffuse
 					Vector3D lightDir = l->position - intersection.pos;
@@ -140,24 +142,25 @@ void a4_render(
 
 					//check if light is blocked by shadow
 					Ray lightRay;
-					lightRay.dir = lightDir;
+					lightRay.dir = intersection.pos - l->position;
+					lightRay.dir.normalize();
 					lightRay.pos = l->position;
 					bool inShadow = false;
 					const double distanceToLight = (intersection.pos - l->position).length();
 
 
-					for (SceneNode::ChildList::const_iterator it = root->children().begin(), end =
-							root->children().end(); it != end; ++it)
+					for (SceneNode::ChildList::const_iterator shadowIt = root->children().begin(), end =
+							root->children().end(); shadowIt != end; ++shadowIt)
 					{
-						GeometryNode *geoNode = dynamic_cast<GeometryNode*>(*it);
+						GeometryNode *geoNode = dynamic_cast<GeometryNode*>(*shadowIt);
 						assert(geoNode);
 
 						// check if the intersection happens
 						Intersection lightIntersection = geoNode->get_primitive()->intersect(lightRay);
 						if (lightIntersection.hit)
 						{
-							// check if the intersection happens before intersection.pos
-							if ((lightIntersection.pos - l->position).length() < distanceToLight)
+							// check if the intersection happens before intersection.pos plus a buffer
+							if ((lightIntersection.pos - l->position).length() < distanceToLight - 0.1)
 							{
 								inShadow = true;
 								break;
