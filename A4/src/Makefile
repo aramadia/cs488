@@ -3,7 +3,7 @@ OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 LDFLAGS = $(shell pkg-config --libs lua) -llua -lpng -L/usr/local/opt/libpng/lib
 CPPFLAGS = $(shell pkg-config --cflags lua) -I/usr/local/opt/libpng/include
-CXXFLAGS = $(CPPFLAGS) -W -Wall -g
+CXXFLAGS = $(CPPFLAGS) -W -Wall -O2
 CXX = g++
 MAIN = rt
 

@@ -87,13 +87,17 @@ void a4_render(// What to render
         //DEBUG_MSG((*it)->name());
         GeometryNode *geoNode = dynamic_cast<GeometryNode*>(*it);
         assert(geoNode);
-        NonhierSphere * sphere = dynamic_cast<NonhierSphere*>(geoNode->get_primitive());
-        assert(sphere);
         
-        Intersection i = sphere->intersect(cameraRay);
+        
+        Intersection i = geoNode->get_primitive()->intersect(cameraRay);
+        
+        if (i.hit)
+        {
+          assert(i.t > 0);
+        }
 
-        if (i.t > 0) {
-          if (intersection.t < 0 || i.t < intersection.t) {
+        if (i.hit) {
+          if (!intersection.hit || i.t < intersection.t) {
             intersection = i;
             intersection.mat = geoNode->get_material();
           }
@@ -154,15 +158,15 @@ void a4_render(// What to render
           Vector3D phongDir = lightDir - reflect * intersection.n;
           double phonCoeff = std::max(phongDir.dot(cameraRay.dir), 0.0);
 
-          DEBUG_MSG("phonCoeff " << phonCoeff << " ks " << mat->shininess());
+          //DEBUG_MSG("phonCoeff " << phonCoeff << " ks " << mat->shininess());
           phonCoeff = pow(phonCoeff, mat->shininess()) * 1.0;
-          DEBUG_MSG("final phonCoeff " << phonCoeff );
+          //DEBUG_MSG("final phonCoeff " << phonCoeff );
 
           color[0] += phonCoeff * mat->specular().R() * l->colour.R();
           color[1] += phonCoeff * mat->specular().G()* l->colour.G();
           color[2] += phonCoeff * mat->specular().B()* l->colour.B();
 
-
+          DEBUG_MSG("phonCoeff " << phonCoeff << " Lambert: " << lambert);
         }
 
 
