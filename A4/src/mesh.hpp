@@ -14,6 +14,8 @@ public:
 
   typedef std::vector<int> Face;
   
+  virtual Intersection intersect(Ray ray);
+  
 private:
   std::vector<Point3D> m_verts;
   std::vector<Face> m_faces;

@@ -29,3 +29,10 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
   std::cerr << "});" << std::endl;
   return out;
 }
+
+
+Intersection Mesh::intersect(Ray ray) {
+  Intersection intersection;
+
+  return intersection;
+}

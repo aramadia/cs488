@@ -66,43 +66,36 @@ void a4_render(// What to render
     for (int x = 0; x < height; x++) {
 
       // create a ray for this pixel
-      Vector3D rayOrigin(x - width/2.f,height/2.f - y , 800.f);
-      Vector3D rayDirection(0.f, 0.f, -1.f);
 
       Ray cameraRay;
 
-      cameraRay.origin = eye;
+      cameraRay.pos = eye;
       cameraRay.dir = cameraDir + -0.5 * ( 2 * y + 1 - height) * cameraDV
         + 0.5* (2*x + 1 - width) * cameraDU;
       cameraRay.dir.normalize();
 
 
-      rayOrigin = cameraRay.origin;
-      rayDirection = cameraRay.dir;
+     
 
 
       // find the closest intersection
 
-      double bestIntersection = -1;
-      GeometryNode *node = NULL;
-      Vector3D bestNormal;
-      Vector3D intersection;
+      
+      Intersection intersection;
+
       for (SceneNode::ChildList::const_iterator it = root->children().begin(), end = root->children().end(); it != end; ++it) {
         //DEBUG_MSG((*it)->name());
         GeometryNode *geoNode = dynamic_cast<GeometryNode*>(*it);
         assert(geoNode);
         NonhierSphere * sphere = dynamic_cast<NonhierSphere*>(geoNode->get_primitive());
         assert(sphere);
-        Vector3D normal;
-        Vector3D t_intersection;
-        double t = sphere->intersect(rayOrigin, rayDirection, t_intersection, normal);
+        
+        Intersection i = sphere->intersect(cameraRay);
 
-        if (t > 0) {
-          if (bestIntersection < 0 || t < bestIntersection) {
-            bestIntersection = t;
-            node = geoNode;
-            bestNormal = normal;
-            intersection = t_intersection;
+        if (i.t > 0) {
+          if (intersection.t < 0 || i.t < intersection.t) {
+            intersection = i;
+            intersection.mat = geoNode->get_material();
           }
         }
 
@@ -111,11 +104,10 @@ void a4_render(// What to render
       // given an intersection, compute if a light is visible
       // compute the color based on the light
 
-
       // Set the color
 
       // show background
-      if (bestIntersection < 0) {
+      if (!intersection.hit) {
 
         // Red: increasing from top to bottom
         img(x, y, 0) = (double)y / height;
@@ -129,7 +121,7 @@ void a4_render(// What to render
 
         Vector3D color;
         //calculate lighting
-        Material *m = node->get_material();
+        Material *m = intersection.mat;
         PhongMaterial *mat = dynamic_cast<PhongMaterial*>(m);
         assert(mat);
 
@@ -148,19 +140,19 @@ void a4_render(// What to render
           color[2] += mat->diffuse().B() * ambient.B();
 
           //diffuse
-          Vector3D lightDir = l->position; - intersection;
+          Vector3D lightDir = l->position; - intersection.pos;
           lightDir.normalize();
 
-          double lambert = (bestNormal.dot(lightDir)) * 1.0;
+          double lambert = (intersection.n.dot(lightDir)) * 1.0;
           color[0] += lambert * mat->diffuse().R() * l->colour.R();
           color[1] += lambert * mat->diffuse().G()* l->colour.G();
           color[2] += lambert * mat->diffuse().B()* l->colour.B();
 
 
           // phong
-          double reflect = 2.0 * (lightDir.dot(bestNormal));
-          Vector3D phongDir = lightDir - reflect * bestNormal;
-          double phonCoeff = std::max(phongDir.dot(rayDirection), 0.0);
+          double reflect = 2.0 * (lightDir.dot(intersection.n));
+          Vector3D phongDir = lightDir - reflect * intersection.n;
+          double phonCoeff = std::max(phongDir.dot(cameraRay.dir), 0.0);
 
           DEBUG_MSG("phonCoeff " << phonCoeff << " ks " << mat->shininess());
           phonCoeff = pow(phonCoeff, mat->shininess()) * 1.0;
