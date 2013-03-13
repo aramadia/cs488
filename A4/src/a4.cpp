@@ -70,7 +70,7 @@ void a4_render(
 			Ray cameraRay;
 
 			cameraRay.pos = eye;
-			cameraRay.dir = cameraDir + -0.5 * (2 * y + 1 - height) * cameraDV + 0.5 * (2 * x + 1 - width) * cameraDU;
+			cameraRay.dir = cameraDir + -0.5 * (2.0 * y + 1.0 - height) * cameraDV + 0.5 * (2.0 * x + 1.0 - width) * cameraDU;
 			cameraRay.dir.normalize();
 
 			// find the closest intersection
@@ -160,7 +160,7 @@ void a4_render(
 						if (lightIntersection.hit)
 						{
 							// check if the intersection happens before intersection.pos plus a buffer
-							if ((lightIntersection.pos - l->position).length() < distanceToLight - 0.1)
+							if ((lightIntersection.pos - l->position).length() < distanceToLight - 0.001)
 							{
 								inShadow = true;
 								break;

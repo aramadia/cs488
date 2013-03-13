@@ -45,7 +45,7 @@ Intersection intersectPolygon(Ray ray, std::vector<Vector3D> polygon)
   // p0-p1 = ray, v0 = point on plane, n plane normal
 
   double den = planeNormal.dot(ray.dir);
-  if (den < 0.01)
+  if (den < 0.001)
   {
     return intersection;
   }

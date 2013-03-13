@@ -86,16 +86,16 @@ NonhierBox::NonhierBox(const Point3D& pos, double size)
 	//	       const std::vector< std::vector<int> >& faces);
 
 		std::vector<Point3D> verts;
-		verts.push_back(Point3D(m_pos[0], m_pos[1], m_pos[2]));
-		verts.push_back(Point3D(m_pos[0] + m_size, m_pos[1], m_pos[2]));
-		verts.push_back(Point3D(m_pos[0] + m_size, m_pos[1], m_pos[2] + m_size));
-		verts.push_back(Point3D(m_pos[0], m_pos[1], m_pos[2] + m_size));
+		verts.push_back(Point3D(m_pos[0], 			m_pos[1], m_pos[2]));
+		verts.push_back(Point3D(m_pos[0] + m_size, 	m_pos[1], m_pos[2]));
+		verts.push_back(Point3D(m_pos[0] + m_size, 	m_pos[1], m_pos[2] + m_size));
+		verts.push_back(Point3D(m_pos[0], 			m_pos[1], m_pos[2] + m_size));
 
 
-		verts.push_back(Point3D(m_pos[0], m_pos[1] + m_size, m_pos[2]));
-		verts.push_back(Point3D(m_pos[0] + m_size, m_pos[1] + m_size, m_pos[2]));
-		verts.push_back(Point3D(m_pos[0] + m_size, m_pos[1] + m_size, m_pos[2] + m_size));
-		verts.push_back(Point3D(m_pos[0], m_pos[1] + m_size, m_pos[2] + m_size));
+		verts.push_back(Point3D(m_pos[0], 			m_pos[1] + m_size, m_pos[2]));
+		verts.push_back(Point3D(m_pos[0] + m_size, 	m_pos[1] + m_size, m_pos[2]));
+		verts.push_back(Point3D(m_pos[0] + m_size, 	m_pos[1] + m_size, m_pos[2] + m_size));
+		verts.push_back(Point3D(m_pos[0], 			m_pos[1] + m_size, m_pos[2] + m_size));
 
 		std::vector<std::vector<int> > faces;
 		int faceArray[6][4] =
