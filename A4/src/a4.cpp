@@ -144,7 +144,7 @@ void a4_render(// What to render
           color[2] += mat->diffuse().B() * ambient.B();
 
           //diffuse
-          Vector3D lightDir = l->position; - intersection.pos;
+          Vector3D lightDir = l->position - intersection.pos;
           lightDir.normalize();
 
           double lambert = (intersection.n.dot(lightDir)) * 1.0;
@@ -181,4 +181,6 @@ void a4_render(// What to render
   }
   img.savePng(filename);
   
+  DEBUG_MSG("Saved to " << filename);
+
 }

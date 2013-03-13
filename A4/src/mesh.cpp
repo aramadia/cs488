@@ -45,7 +45,7 @@ Intersection intersectPolygon(Ray ray, std::vector<Vector3D> polygon)
   // p0-p1 = ray, v0 = point on plane, n plane normal
 
   double den = planeNormal.dot(ray.dir);
-  if (abs(den) < 0.0001) 
+  if (den < 0.001)
   {
     return intersection;
   }
@@ -53,60 +53,76 @@ Intersection intersectPolygon(Ray ray, std::vector<Vector3D> polygon)
   double num = planeNormal.dot(polygon[0] - ray.pos);
   double t = num/den;
 
-  //DEBUG_MSG("plane hit: " << t);
+  DEBUG_MSG("plane hit: " << t);
 
   intersection.pos = ray.pos + t*ray.dir;
 
-
-  // ok....
-  // point test_line = vectorSub(Answer, Poly.P[0])
-  // point test_axis = crossProduct(plane_normal, test_line)
-
-  Vector3D test_line = intersection.pos - polygon[0];
-  Vector3D test_axis = planeNormal.cross(test_line);
-
   bool point_is_inside = false;
-
-  // point test_point = vectorSub(Poly.P[1], Answer)
-  // bool prev_point_ahead = (dotProduct(test_line, test_point) > 0)
-  // bool prev_point_above = (dotProduct(test_axis, test_point) > 0)
-
-  Vector3D test_point = polygon[1] - intersection.pos;
-  bool prev_point_ahead = test_line.dot(test_point) > 0;
-  bool prev_point_above = test_axis.dot(test_point) > 0;
-
-
-
-  bool this_point_ahead;
-  bool this_point_above;
-
-  unsigned int index = 2;
-  while (index < polygon.size())
+  for (unsigned int i = 0; i < polygon.size(); i++)
   {
-      // test_point = vectorSub(Poly.P[index], Answer)
-      // this_point_ahead = (dotProduct(test_line, test_point) > 0)
+	  double d = ((polygon[(i+1)%polygon.size()]) - polygon[i]).cross(intersection.pos - polygon[i]).dot(planeNormal);
+	  if (d >= 0)
+	  {
+		  point_is_inside = true;
+	  }
+	  else
+	  {
+		  point_is_inside = false;
+		  break;
+	  }
 
-      test_point = polygon[index] - intersection.pos;
-      this_point_ahead = test_line.dot(test_point) > 0;
+  }
 
-      if (prev_point_ahead || this_point_ahead)
-      {
-          //this_point_above = (dotProduct(test_axis, test_point) > 0)
-        this_point_above = test_axis.dot(test_point) > 0;
-
-        if (prev_point_above ^ this_point_above)
-        {
-            point_is_inside = !point_is_inside;
-        }
-      }
-
-      prev_point_ahead = this_point_ahead;
-      prev_point_above = this_point_above;
-      index++;
-    }
+//  // ok....
+//  // point test_line = vectorSub(Answer, Poly.P[0])
+//  // point test_axis = crossProduct(plane_normal, test_line)
+//
+//  Vector3D test_line = intersection.pos - polygon[0];
+//  Vector3D test_axis = planeNormal.cross(test_line);
+//
+//  bool point_is_inside = false;
+//
+//  // point test_point = vectorSub(Poly.P[1], Answer)
+//  // bool prev_point_ahead = (dotProduct(test_line, test_point) > 0)
+//  // bool prev_point_above = (dotProduct(test_axis, test_point) > 0)
+//
+//  Vector3D test_point = polygon[1] - intersection.pos;
+//  bool prev_point_ahead = test_line.dot(test_point) > 0;
+//  bool prev_point_above = test_axis.dot(test_point) > 0;
+//
+//
+//
+//  bool this_point_ahead;
+//  bool this_point_above;
+//
+//  unsigned int index = 2;
+//  while (index < polygon.size())
+//  {
+//      // test_point = vectorSub(Poly.P[index], Answer)
+//      // this_point_ahead = (dotProduct(test_line, test_point) > 0)
+//
+//      test_point = polygon[index] - intersection.pos;
+//      this_point_ahead = test_line.dot(test_point) > 0;
+//
+//      if (prev_point_ahead || this_point_ahead)
+//      {
+//          //this_point_above = (dotProduct(test_axis, test_point) > 0)
+//        this_point_above = test_axis.dot(test_point) > 0;
+//
+//        if (prev_point_above ^ this_point_above)
+//        {
+//            point_is_inside = !point_is_inside;
+//        }
+//      }
+//
+//      prev_point_ahead = this_point_ahead;
+//      prev_point_above = this_point_above;
+//      index++;
+//    }
 
     intersection.hit =  point_is_inside;
-    intersection.n = planeNormal;
+    intersection.n = -1.0 * planeNormal;
+
     intersection.t = t;
     return intersection;
 
@@ -124,7 +140,7 @@ Intersection Mesh::intersect(Ray ray) {
     std::vector<Vector3D> polygon;
 
     Face face = *it;
-    for (int i = 0; i < face.size(); i++)
+    for (unsigned int i = 0; i < face.size(); i++)
     {
       polygon.push_back(m_verts[face[i]]);
 

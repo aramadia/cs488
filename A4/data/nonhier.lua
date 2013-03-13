@@ -35,7 +35,7 @@ s5:set_material(mat1)
 
 require('smstdodeca')
 
-steldodec:set_material(mat1)
+steldodec:set_material(mat3)
 scene_root:add_child(steldodec)
 
 white_light = gr.light({-100.0, 150.0, 400.0}, {0.9, 0.9, 0.9}, {1, 0, 0})
