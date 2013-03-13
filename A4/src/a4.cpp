@@ -23,18 +23,39 @@ void a4_render(// What to render
 {
   // Fill in raytracing code here.
 
-  std::cerr << "Stub: a4_render(" << root << ",\n     "
+  DEBUG_MSG( "Stub: a4_render(" << root << ",\n     "
             << filename << ", " << width << ", " << height << ",\n     "
             << eye << ", " << view << ", " << up << ", " << fov << ",\n     "
-            << ambient << ",\n     {";
+            << ambient << ",\n     {" );
 
   for (std::list<Light*>::const_iterator I = lights.begin(); I != lights.end(); ++I) {
     if (I != lights.begin()) std::cerr << ", ";
-    std::cerr << **I;
+    DEBUG_MSG(**I);
   }
-  std::cerr << "});" << std::endl;
+  DEBUG_MSG( "});" << std::endl);
   
-  // For now, just make a sample image.
+  // Camera Model from http://courses.csusm.edu/cs697exz/camera.html
+ 
+  // convert fov to radians
+  fov = fov * M_PI / 180.0;
+
+  // Camera is pointing where?
+  Vector3D cameraDir = view;
+  cameraDir.normalize();
+
+  Vector3D cameraUp = up;
+  cameraUp.normalize();
+
+  // Camera x axis
+  Vector3D cameraU = cameraDir.cross(cameraUp);
+  cameraU.normalize();
+  // Camera y axis
+  Vector3D cameraV = cameraU.cross(cameraDir);
+  cameraV.normalize();
+
+  Vector3D cameraDU = 2 * tan(fov/2.0) / width * cameraU;
+  Vector3D cameraDV = 2 * tan(fov/2.0) / height * cameraV;
+
 
 
   // RHS coordinate system
@@ -47,6 +68,18 @@ void a4_render(// What to render
       // create a ray for this pixel
       Vector3D rayOrigin(x - width/2.f,height/2.f - y , 800.f);
       Vector3D rayDirection(0.f, 0.f, -1.f);
+
+      Ray cameraRay;
+
+      cameraRay.origin = eye;
+      cameraRay.dir = cameraDir + -0.5 * ( 2 * y + 1 - height) * cameraDV
+        + 0.5* (2*x + 1 - width) * cameraDU;
+      cameraRay.dir.normalize();
+
+
+      rayOrigin = cameraRay.origin;
+      rayDirection = cameraRay.dir;
+
 
       // find the closest intersection
 
@@ -109,10 +142,16 @@ void a4_render(// What to render
           // once it hits, the lighting is equal eveywehre
           // float lambert = (lightRay.dir * n) * coef;
 
+          //ambient
+          color[0] += mat->diffuse().R() * ambient.R();
+          color[1] += mat->diffuse().G() * ambient.G();
+          color[2] += mat->diffuse().B() * ambient.B();
+
+          //diffuse
           Vector3D lightDir = l->position; - intersection;
           lightDir.normalize();
 
-          double lambert = (bestNormal.dot(lightDir)) * 0.5;
+          double lambert = (bestNormal.dot(lightDir)) * 1.0;
           color[0] += lambert * mat->diffuse().R() * l->colour.R();
           color[1] += lambert * mat->diffuse().G()* l->colour.G();
           color[2] += lambert * mat->diffuse().B()* l->colour.B();
@@ -137,9 +176,9 @@ void a4_render(// What to render
 
         DEBUG_MSG("x" << x << " y:" << y << " " << color);
 
-        img(x,y,0) = color[0];
-        img(x,y,1) = color[1];
-        img(x,y,2) = color[2];
+        img(x,y,0) = color[0]/2;
+        img(x,y,1) = color[1]/2;
+        img(x,y,2) = color[2]/2;
 
       }
     }

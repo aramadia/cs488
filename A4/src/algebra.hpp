@@ -498,4 +498,11 @@ inline std::ostream& operator <<(std::ostream& os, const Colour& c)
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
 }
 
+class Ray {
+
+public:
+  Vector3D origin;
+  Vector3D dir;
+};
+
 #endif // CS488_ALGEBRA_HPP
