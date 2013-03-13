@@ -105,12 +105,21 @@ void a4_render(
 			if (!intersection.hit)
 			{
 
+				// take the angles of the vector
+				double latitude = sin(cameraRay.dir[1]);	// -pi/2 to pi/2
+				// scale to 0 to 1
+				latitude = (latitude/M_PI) + 0.5;
+				img(x,y,0) = latitude;
+				img(x,y,1) = 0.1 + latitude * 0.3;
+				img(x,y,2) = latitude * 0.2;
+
+
 				// Red: increasing from top to bottom
-				img(x, y, 0) = (double) y / height;
+				//img(x, y, 0) = (double) y / height;
 				// Green: increasing from left to right
-				img(x, y, 1) = (double) x / width;
+				//img(x, y, 1) = (double) x / width;
 				// Blue: in lower-left and upper-right corners
-				img(x, y, 2) = ((y < height / 2 && x < height / 2) || (y >= height / 2 && x >= height / 2)) ? 1.0 : 0.0;
+				//img(x, y, 2) = ((y < height / 2 && x < height / 2) || (y >= height / 2 && x >= height / 2)) ? 1.0 : 0.0;
 			}
 			else
 			{
@@ -133,7 +142,9 @@ void a4_render(
 					Ray lightRay;
 					lightRay.dir = lightDir;
 					lightRay.pos = l->position;
-					Intersection lightIntersection;
+					bool inShadow = false;
+					const double distanceToLight = (intersection.pos - l->position).length();
+
 
 					for (SceneNode::ChildList::const_iterator it = root->children().begin(), end =
 							root->children().end(); it != end; ++it)
@@ -141,15 +152,21 @@ void a4_render(
 						GeometryNode *geoNode = dynamic_cast<GeometryNode*>(*it);
 						assert(geoNode);
 
-						lightIntersection = geoNode->get_primitive()->intersect(lightRay);
+						// check if the intersection happens
+						Intersection lightIntersection = geoNode->get_primitive()->intersect(lightRay);
 						if (lightIntersection.hit)
 						{
-							break;
+							// check if the intersection happens before intersection.pos
+							if ((lightIntersection.pos - l->position).length() < distanceToLight)
+							{
+								inShadow = true;
+								break;
+							}
 						}
 					}
 
 					// Don't process thist light
-					if (lightIntersection.hit)
+					if (inShadow)
 					{
 						continue;
 					}
