@@ -1,0 +1,145 @@
+sum is: /usr/bin/sum
+
+
+2013-03-13 13:56        Checksum for A4 for dalam on gl04         Page 1
+
+
+A4:
+total 160
+51329174 drwxrwx--- 4 dalam cs488  4096 Mar 13 13:56 ./
+57445737 -rw-r----- 1 dalam dalam   357 Mar 13 13:56 README
+45297420 drwxrws--x 2 dalam dalam  4096 Mar 13 13:56 data/
+57445736 -rw-r----- 1 dalam dalam   356 Mar 13 13:55 README~
+58858401 drwxrws--x 2 dalam dalam  4096 Mar 13 13:53 src/
+57445732 -rwxr-x--x 1 dalam dalam 81385 Mar 13 13:52 rt*
+57445735 -rw-r----- 1 dalam dalam 47821 Mar 13 13:48 screenshot01.png
+41943242 drwxrwx--- 8 dalam cs488  4096 Feb 11 13:39 ../
+
+A4/data:
+total 384
+51329174 drwxrwx--- 4 dalam cs488   4096 Mar 13 13:56 ../
+45297420 drwxrws--x 2 dalam dalam   4096 Mar 13 13:56 ./
+57445733 -rw-r----- 1 dalam dalam  58342 Mar 13 13:53 sample.png
+57445734 -rw-r----- 1 dalam dalam    860 Mar 13 13:47 sample.lua
+45297438 -rw-r----- 1 dalam dalam  20200 Mar 13 13:34 nonhier.png
+45297421 -rw-r----- 1 dalam dalam   4322 Mar 13 13:30 buckyball.lua
+45297429 -rw-r----- 1 dalam dalam 180010 Mar 13 13:30 cow.obj
+45297431 -rw-r----- 1 dalam dalam   1011 Mar 13 13:30 cylinder.lua
+45297432 -rw-r----- 1 dalam dalam   1673 Mar 13 13:30 dodeca.lua
+45297439 -rw-r----- 1 dalam dalam   2857 Mar 13 13:30 hier.lua
+45297440 -rw-r----- 1 dalam dalam    755 Mar 13 13:30 icosa.lua
+57692817 -rw-r----- 1 dalam dalam   1566 Mar 13 13:30 instance.lua
+57692819 -rw-r----- 1 dalam dalam   2845 Mar 13 13:30 macho-cows.lua
+57692820 -rw-r----- 1 dalam dalam  38328 Mar 13 13:30 mickey.lua
+45297433 -rw-r----- 1 dalam dalam   1471 Mar 13 13:30 nonhier2.lua
+57692821 -rw-r----- 1 dalam dalam   1281 Mar 13 13:30 nonhier.lua
+45297434 -rw-r----- 1 dalam dalam   1268 Mar 13 13:30 readobj.lua
+45297435 -rw-r----- 1 dalam dalam   2907 Mar 13 13:30 simple-cows.lua
+45297436 -rw-r----- 1 dalam dalam   1063 Mar 13 13:30 simple.lua
+45297437 -rw-r----- 1 dalam dalam   8859 Mar 13 13:30 smstdodeca.lua
+
+A4/src:
+total 216
+51329174 drwxrwx--- 4 dalam cs488  4096 Mar 13 13:56 ../
+58858401 drwxrws--x 2 dalam dalam  4096 Mar 13 13:53 ./
+54074271 -rw-r----- 1 dalam dalam  5493 Mar 13 13:52 a4.cpp
+26724686 -rw-r----- 1 dalam dalam   206 Mar 13 13:40 debug.hpp
+58858416 -rwxr-x--x 1 dalam dalam   216 Mar 13 13:33 work.sh*
+58858419 -rw-r----- 1 dalam dalam   731 Mar 13 13:33 Makefile
+58858420 -rw-r----- 1 dalam dalam  5495 Mar 13 13:30 a4.cpp~
+58858421 -rw-r----- 1 dalam dalam   637 Mar 13 13:30 a4.hpp
+ 4390490 -rw-r----- 1 dalam dalam  3308 Mar 13 13:30 algebra.cpp
+26724685 -rw-r----- 1 dalam dalam 10020 Mar 13 13:30 algebra.hpp
+26724687 -rw-r----- 1 dalam dalam  6107 Mar 13 13:30 image.cpp
+26724688 -rw-r----- 1 dalam dalam  1787 Mar 13 13:30 image.hpp
+26724689 -rw-r----- 1 dalam dalam   415 Mar 13 13:30 light.cpp
+26724690 -rw-r----- 1 dalam dalam   287 Mar 13 13:30 light.hpp
+26724691 -rw-r----- 1 dalam dalam   170 Mar 13 13:30 lua488.hpp
+58858402 -rw-r----- 1 dalam dalam   276 Mar 13 13:30 main.cpp
+58858403 -rw-r----- 1 dalam dalam   326 Mar 13 13:30 material.cpp
+58858404 -rw-r----- 1 dalam dalam   575 Mar 13 13:30 material.hpp
+58858405 -rw-r----- 1 dalam dalam  4684 Mar 13 13:30 mesh.cpp
+58858406 -rw-r----- 1 dalam dalam   526 Mar 13 13:30 mesh.hpp
+
+
+
+
+
+
+
+2013-03-13 13:56        Checksum for A4 for dalam on gl04         Page 2
+
+
+58858407 -rw-r----- 1 dalam dalam 47477 Mar 13 13:30 polyroots.cpp
+58858408 -rw-r----- 1 dalam dalam   966 Mar 13 13:30 polyroots.hpp
+58858409 -rw-r----- 1 dalam dalam  2642 Mar 13 13:30 primitive.cpp
+58858410 -rw-r----- 1 dalam dalam  1024 Mar 13 13:30 primitive.hpp
+58858411 -rw-r----- 1 dalam dalam  5245 Mar 13 13:30 scene.cpp
+58858412 -rw-r----- 1 dalam dalam  2232 Mar 13 13:30 scene.hpp
+58858413 -rw-r----- 1 dalam dalam 15791 Mar 13 13:30 scene_lua.cpp
+58858414 -rw-r----- 1 dalam dalam   136 Mar 13 13:30 scene_lua.hpp
+58858415 -rw-r----- 1 dalam dalam 15572 Mar 13 13:30 simple.png
+
+A4                                      
+A4/data                                 
+A4/data/buckyball.lua                   10689     5
+A4/data/cow.obj                         57991   176
+A4/data/cylinder.lua                    01173     1
+A4/data/dodeca.lua                      50755     2
+A4/data/hier.lua                        09954     3
+A4/data/icosa.lua                       58132     1
+A4/data/instance.lua                    25944     2
+A4/data/macho-cows.lua                  09303     3
+A4/data/mickey.lua                      01039    38
+A4/data/nonhier2.lua                    12520     2
+A4/data/nonhier.lua                     03278     2
+A4/data/nonhier.png                     34625    20
+A4/data/readobj.lua                     57040     2
+A4/data/sample.lua                      31965     1
+A4/data/sample.png                      30737    57
+A4/data/simple-cows.lua                 10797     3
+A4/data/simple.lua                      25591     2
+A4/data/smstdodeca.lua                  02544     9
+A4/README                               54082     1
+A4/README~                              58270     1
+A4/rt                                   54011    80
+A4/screenshot01.png                     26003    47
+A4/src                                  
+A4/src/a4.cpp~                          10256     6
+A4/src/a4.cpp                           28100     6
+A4/src/a4.hpp                           30758     1
+A4/src/algebra.cpp                      00294     4
+A4/src/algebra.hpp                      28119    10
+A4/src/debug.hpp                        24999     1
+A4/src/image.cpp                        42618     6
+A4/src/image.hpp                        52703     2
+A4/src/light.cpp                        61411     1
+A4/src/light.hpp                        49384     1
+A4/src/lua488.hpp                       04702     1
+A4/src/main.cpp                         38275     1
+A4/src/Makefile                         44353     1
+A4/src/material.cpp                     33513     1
+A4/src/material.hpp                     03578     1
+A4/src/mesh.cpp                         01198     5
+A4/src/mesh.hpp                         55249     1
+A4/src/polyroots.cpp                    13141    47
+A4/src/polyroots.hpp                    52382     1
+A4/src/primitive.cpp                    26049     3
+A4/src/primitive.hpp                    06056     1
+
+
+
+
+
+
+
+2013-03-13 13:56        Checksum for A4 for dalam on gl04         Page 3
+
+
+A4/src/scene.cpp                        56563     6
+A4/src/scene.hpp                        60811     3
+A4/src/scene_lua.cpp                    62316    16
+A4/src/scene_lua.hpp                    33354     1
+A4/src/simple.png                       25635    16
+A4/src/work.sh                          06128     1
+
