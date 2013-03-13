@@ -32,20 +32,20 @@ Matrix4x4 rotation(double angle, char axis)
   switch(axis) {
     case 'x':
       r1 = Vector4D(1, 0, 0, 0);
-      r2 = Vector4D(0, c, s, 0);
-      r3 = Vector4D(0, -s, c, 0);
+      r2 = Vector4D(0, c, -s, 0);
+      r3 = Vector4D(0, s, c, 0);
       r4 = Vector4D(0, 0, 0, 1);
       break;
   case 'y':
 
-      r1 = Vector4D(c, 0, -s, 0);
+      r1 = Vector4D(c, 0, s, 0);
       r2 = Vector4D(0, 1, 0, 0);
-      r3 = Vector4D(s, 0, c, 0);
+      r3 = Vector4D(-s, 0, c, 0);
       r4 = Vector4D(0, 0, 0, 1);
       break;
   case 'z':
-      r1 = Vector4D(c, s, 0, 0);
-      r2 = Vector4D(-s, c, 0, 0);
+      r1 = Vector4D(c, -s, 0, 0);
+      r2 = Vector4D(s, c, 0, 0);
       r3 = Vector4D(0, 0, 1, 0);
       r4 = Vector4D(0, 0, 0, 1);
       break;

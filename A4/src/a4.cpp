@@ -108,13 +108,6 @@ void a4_render(
 				img(x,y,1) = 0.1 + latitude * 0.3;
 				img(x,y,2) = latitude * 0.2;
 
-
-				// Red: increasing from top to bottom
-				//img(x, y, 0) = (double) y / height;
-				// Green: increasing from left to right
-				//img(x, y, 1) = (double) x / width;
-				// Blue: in lower-left and upper-right corners
-				//img(x, y, 2) = ((y < height / 2 && x < height / 2) || (y >= height / 2 && x >= height / 2)) ? 1.0 : 0.0;
 			}
 			else
 			{
