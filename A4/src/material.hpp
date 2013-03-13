@@ -21,6 +21,9 @@ public:
 
   virtual void apply_gl() const;
 
+  Colour diffuse() { return m_kd; }
+  Colour specular() { return m_ks; }
+  double shininess() { return m_shininess; }
 private:
   Colour m_kd;
   Colour m_ks;

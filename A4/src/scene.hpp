@@ -94,8 +94,8 @@ public:
                Primitive* primitive);
   virtual ~GeometryNode();
 
-  const Material* get_material() const;
-  Material* get_material();
+  const Material* get_material() const { return m_material; }
+  Material* get_material() { return m_material; }
 
   void set_material(Material* material)
   {

@@ -25,7 +25,8 @@ public:
   {
   }
   virtual ~NonhierSphere();
-  float intersect(Vector3D rayOrigin, Vector3D rayDirection, Vector3D &normal);
+  float intersect(Vector3D rayOrigin, Vector3D rayDirection, 
+    Vector3D &out_intersection, Vector3D &out_normal);
 
 private:
   Point3D m_pos;
