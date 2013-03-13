@@ -33,7 +33,7 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
 }
 
 // Based of http://stackoverflow.com/questions/312328/what-is-the-fastest-way-to-find-the-point-of-intersection-between-a-ray-and-a-po
-Intersection intersectPolygon(Ray ray, std::vector<Vector3D> polygon)
+Intersection intersectPolygon(Ray ray, std::vector<Point3D> polygon)
 {
   Intersection intersection;
 
@@ -145,7 +145,7 @@ Intersection Mesh::intersect(Ray ray) {
   //for (SceneNode::ChildList::const_iterator it = root->children().begin(), end = root->children().end(); it != end; ++it) {
   for (std::vector<Face>::const_iterator it = m_faces.begin(), end = m_faces.end(); it != end; ++it)
   {
-    std::vector<Vector3D> polygon;
+    std::vector<Point3D> polygon;
 
     Face face = *it;
     for (unsigned int i = 0; i < face.size(); i++)

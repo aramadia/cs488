@@ -503,14 +503,14 @@ inline std::ostream& operator <<(std::ostream& os, const Colour& c)
 class Ray {
 
 public:
-  Vector3D pos;
+  Point3D pos;
   Vector3D dir;
 };
 
 class Intersection {
 public:
   double t; // distance along ray for intersection
-  Vector3D pos;     // location of hit
+  Point3D pos;     // location of hit
   Vector3D n;  // normal for this intersection surface
   bool hit;
   Material *mat;

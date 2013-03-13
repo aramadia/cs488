@@ -35,26 +35,36 @@ void a4_render(
 	// Camera Model from http://courses.csusm.edu/cs697exz/camera.html
 
 	// convert fov to radians
-	double fovy = fov * M_PI / 180.0;
+//	double fovy = fov * M_PI / 180.0;
+//
+//	const double aspect = (double)width/(double)height;
+//
+//	// Camera is pointing where?
+//	Vector3D cameraDir = view;
+//	cameraDir.normalize();
+//
+//	Vector3D cameraUp = up;
+//	cameraUp.normalize();
+//
+//	// Camera x axis
+//	Vector3D cameraU = cameraDir.cross(cameraUp);
+//	cameraU.normalize();
+//	// Camera y axis
+//	Vector3D cameraV = cameraU.cross(cameraDir);
+//	cameraV.normalize();
+//
+//	Vector3D cameraDU = 2.0 * aspect * tan(fovy / 2.0) / (double)width * cameraU;
+//	Vector3D cameraDV = 2.0 * tan(fovy / 2.0) / (double)height * cameraV;
 
-	const double aspect = (double)width/(double)height;
-
-	// Camera is pointing where?
-	Vector3D cameraDir = view;
-	cameraDir.normalize();
-
-	Vector3D cameraUp = up;
-	cameraUp.normalize();
-
-	// Camera x axis
-	Vector3D cameraU = cameraDir.cross(cameraUp);
-	cameraU.normalize();
-	// Camera y axis
-	Vector3D cameraV = cameraU.cross(cameraDir);
-	cameraV.normalize();
-
-	Vector3D cameraDU = 2.0 * aspect * tan(fovy / 2.0) / (double)width * cameraU;
-	Vector3D cameraDV = 2.0 * tan(fovy / 2.0) / (double)height * cameraV;
+	double fov_radius = fov*M_PI/360.0;
+		//2. get side vector
+		Vector3D side_vector = view.cross(up);
+		Vector3D m_view = view;
+		Vector3D m_up = up;
+		//normalize view, side, up
+		side_vector.normalize();
+		m_view.normalize();
+		m_up.normalize();
 
 	// RHS coordinate system
 	Image img(width, height, 3);
@@ -70,7 +80,8 @@ void a4_render(
 			Ray cameraRay;
 
 			cameraRay.pos = eye;
-			cameraRay.dir = cameraDir + -0.5 * (2.0 * y + 1.0 - height) * cameraDV + 0.5 * (2.0 * x + 1.0 - width) * cameraDU;
+			cameraRay.dir = m_view + (x / (double(width)) * 2 -1 )* tan(fov_radius) * (double(width)/double(height)) * side_vector
+					 + ((y) / (double(height)) * 2 - 1) * tan(fov_radius) * -(m_up) ;
 			cameraRay.dir.normalize();
 
 			// find the closest intersection

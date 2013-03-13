@@ -140,8 +140,15 @@ Intersection SceneNode::intersect(Ray ray)
 	Intersection intersection;
 
 	// transform ray.  Instead of moving the node, move the ray by the inverse transform
+	DEBUG_MSG("Original ray: " << ray.pos << "," << ray.dir << " at " << m_name << "");
 	ray.dir = m_invtrans * ray.dir;
 	ray.pos = m_invtrans * ray.pos;
+	DEBUG_MSG("Transformed ray: " << ray.pos << "," << ray.dir << " at " << m_name << "");
+
+//	Matrix4x4 t = translation(Vector3D(150, 0, 0));
+//	DEBUG_MSG("Translation " << t);
+//	ray.pos =  t * ray.pos;
+//	DEBUG_MSG("Test ray: " << ray.pos << "," << ray.dir << " at " << m_name << "");
 
 	for (SceneNode::ChildList::const_iterator it = m_children.begin(), end = m_children.end();
 						it != end; ++it)
