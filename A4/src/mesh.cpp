@@ -53,7 +53,7 @@ Intersection intersectPolygon(Ray ray, std::vector<Vector3D> polygon)
   double num = planeNormal.dot(polygon[0] - ray.pos);
   double t = num/den;
 
-  DEBUG_MSG("plane hit: " << t);
+  // DEBUG_MSG("plane hit: " << t);
 
   intersection.pos = ray.pos + t*ray.dir;
 
