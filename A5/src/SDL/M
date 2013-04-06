@@ -1,4 +1,0 @@
-
-all:
-	gcc -g -o test cone3d.cpp cone3dfont.cpp cone3dtga.cpp main.cpp \
--I/usr/include/SDL -lGL -lGLU -lSDL 
