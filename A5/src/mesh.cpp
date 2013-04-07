@@ -168,6 +168,32 @@ Intersection Mesh::intersect(Ray ray) {
         intersection = pIntersect;
       }
     }
+    else
+    {
+//    	 Face face = *it;
+//    	 polygon.clear();
+//		for (int i = face.size() - 1; i >= 0; i--)
+//		{
+//		  polygon.push_back(m_verts[face[i]]);
+//
+//		  //DEBUG_MSG("\t" << face[i]);
+//		}
+//		//DEBUG_MSG(polygon.size());
+//
+//		Intersection pIntersect = intersectPolygon(ray, polygon);
+//
+//		if (pIntersect.hit)
+//		{
+//		  //DEBUG_MSG("HIT");
+//		  if (!intersection.hit || pIntersect.t < intersection.t )
+//		  {
+//
+//			//DEBUG_MSG("HIT SET");
+//			intersection = pIntersect;
+//		  }
+//		}
+
+    }
 
 
   }    
