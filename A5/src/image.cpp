@@ -75,6 +75,12 @@ double& Image::operator()(int x, int y, int i)
   return m_data[m_elements * (m_width * y + x) + i];
 }
 
+Colour Image::operator()(int x, int y) const
+{
+
+	return Colour(operator()(x,y, 0), operator()(x,y, 1), operator()(x,y, 2));
+}
+
 bool Image::savePng(const std::string& filename)
 {
   FILE* fout = std::fopen(filename.c_str(), "wb");

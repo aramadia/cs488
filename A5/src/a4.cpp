@@ -7,6 +7,7 @@
 #include "debug.hpp"
 #include "primitive.hpp"
 #include "material.hpp"
+#include "cubicmap.hpp"
 #define NUM_THREADS	8
 
 //using namespace std;
@@ -35,6 +36,8 @@ struct thread_data
 	// Lighting parameters
 	Colour ambient;
 	std::list<Light*> lights;
+	CubicMap *cubicMap;
+
 
 };
 
@@ -44,7 +47,7 @@ Colour cast_ray(Ray cameraRay,
 
 		SceneNode* root,
 		// Lighting parameters
-		Colour ambient, std::list<Light*> lights)
+		Colour ambient, std::list<Light*> lights, CubicMap *cubicMap)
 {
 	// find the closest intersection
 
@@ -63,12 +66,21 @@ Colour cast_ray(Ray cameraRay,
 				{
 
 					// take the angles of the vector
-					double latitude = sin(cameraRay.dir[1]);	// -pi/2 to pi/2
-					// scale to 0 to 1
-					latitude = (latitude/M_PI) + 0.5;
-					Colour c (latitude, 0.1 + latitude * 0.3, latitude * 0.2);
 
-					return c;
+					if (cubicMap == NULL)
+					{
+						double latitude = sin(cameraRay.dir[1]);	// -pi/2 to pi/2
+						// scale to 0 to 1
+						latitude = (latitude/M_PI) + 0.5;
+						Colour c (latitude, 0.1 + latitude * 0.3, latitude * 0.2);
+
+						return c;
+					}
+					else
+					{
+						Colour c = cubicMap->hit(cameraRay);
+						return c;
+					}
 
 				}
 				else
@@ -170,7 +182,7 @@ void a4_render_helper(
 		// Viewing parameters
 		const Point3D& eye, const Vector3D& view, const Vector3D& up, double fov,
 		// Lighting parameters
-		Colour ambient, std::list<Light*> lights)
+		Colour ambient, std::list<Light*> lights, CubicMap *cubicMap)
 {
 	// Fill in raytracing code here.
 
@@ -252,7 +264,7 @@ void a4_render_helper(
 								+ ((myY) / (double(height)) * 2 - 1) * tan(fov_radius) * -(m_up) ;
 						cameraRay.dir.normalize();
 
-						Colour c = cast_ray(cameraRay, root, ambient, lights);
+						Colour c = cast_ray(cameraRay, root, ambient, lights, cubicMap);
 						averageColour = averageColour + c;
 					}
 				}
@@ -274,7 +286,7 @@ void a4_render_helper(
 						+ ((y) / (double(height)) * 2 - 1) * tan(fov_radius) * -(m_up) ;
 				cameraRay.dir.normalize();
 
-				Colour pixelColour = cast_ray(cameraRay, root, ambient, lights);
+				Colour pixelColour = cast_ray(cameraRay, root, ambient, lights, cubicMap);
 
 				img(x, y, 0) = pixelColour.R();
 				img(x, y, 1) = pixelColour.G();
@@ -304,7 +316,7 @@ void *RaytraceJob(void *threadarg)
 			*my_data->img,
 			my_data->width, my_data->height,
 			my_data->eye, my_data->view, my_data->up,
-			my_data->fov, my_data->ambient, my_data->lights);
+			my_data->fov, my_data->ambient, my_data->lights, my_data->cubicMap);
 
 	pthread_exit(NULL);
 }
@@ -337,6 +349,10 @@ void a4_render(
 
 	// RHS coordinate system
 	Image img(width, height, 3);
+
+	// Create the cubicmap
+	CubicMap cubicMap;
+
 
 	pthread_t threads[NUM_THREADS];
 	pthread_attr_t attr;
@@ -373,6 +389,7 @@ void a4_render(
 		thread_data_array[t].fov = fov;
 		thread_data_array[t].ambient = ambient;
 		thread_data_array[t].lights = lights;
+		thread_data_array[t].cubicMap = &cubicMap;
 
 
 
@@ -479,6 +496,7 @@ void a4_render(
 		thread_data_array[t].fov = fov;
 		thread_data_array[t].ambient = ambient;
 		thread_data_array[t].lights = lights;
+		thread_data_array[t].cubicMap = &cubicMap;
 
 
 
