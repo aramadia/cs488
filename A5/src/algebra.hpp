@@ -437,6 +437,9 @@ inline std::ostream& operator <<(std::ostream& os, const Matrix4x4& M)
 class Colour
 {
 public:
+	Colour():
+		 r_(0), g_(0), b_(0)
+	{}
   Colour(double r, double g, double b)
     : r_(r)
     , g_(g)
