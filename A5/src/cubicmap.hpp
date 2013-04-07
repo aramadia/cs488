@@ -28,8 +28,9 @@ public:
 	};
 
 	// Determine the colour given an infinite ray hitting the cube
-	Colour hit(const Ray &ray) const;
+	Colour hit(Ray ray) const;
 private:
+public:
 	std::vector<Texture> m_textures;
 
 };

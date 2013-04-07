@@ -48,7 +48,7 @@ Colour Texture::read(double u, double v) const
 	vmin = min(max(vmin, 0), height-1);
 	vmax = min(max(vmax, 0), height - 1);
 
-	Colour cmin = m_image(umin, umin);
+	Colour cmin = m_image(umin, vmin);
 	Colour cmax = m_image(umax, vmax);
 
 	double uD = width * u - umin;

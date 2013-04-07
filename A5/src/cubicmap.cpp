@@ -36,8 +36,11 @@ CubicMap::~CubicMap()
 }
 
 
-Colour CubicMap::hit(const Ray &ray) const
+Colour CubicMap::hit(Ray ray) const
 {
+	// fix the coordinate system
+	//ray.dir[1] *= -1;
+
 	Colour outputColour;
 
 	double ax = abs(ray.dir[0]);
@@ -101,6 +104,8 @@ Colour CubicMap::hit(const Ray &ray) const
 
 	// transform colour
 	const Texture &t =  m_textures[face];
+	u = 1.0 - u;
+	v = 1.0 - v;
 	outputColour = t.read(u, v);
 
 	// fix gamma, exposure

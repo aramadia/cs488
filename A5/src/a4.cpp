@@ -8,7 +8,10 @@
 #include "primitive.hpp"
 #include "material.hpp"
 #include "cubicmap.hpp"
+//#define NUM_THREADS	1 //8
 #define NUM_THREADS	8
+
+const bool DO_SUPERSAMPLE = false;
 
 //using namespace std;
 
@@ -43,7 +46,10 @@ struct thread_data
 
 struct thread_data thread_data_array[NUM_THREADS];
 
-Colour cast_ray(Ray cameraRay,
+Colour cast_ray(
+		double x, double y,
+
+		Ray cameraRay,
 
 		SceneNode* root,
 		// Lighting parameters
@@ -51,124 +57,134 @@ Colour cast_ray(Ray cameraRay,
 {
 	// find the closest intersection
 
-				Intersection intersection;
-				intersection = root->intersect(cameraRay);
+	Intersection intersection;
+	intersection = root->intersect(cameraRay);
 
 
 
-				// given an intersection, compute if a light is visible
-				// compute the color based on the light
+	// given an intersection, compute if a light is visible
+	// compute the color based on the light
 
-				// Set the color
+	// Set the color
 
-				// show background
-				if (!intersection.hit)
+	// show background
+	if (!intersection.hit)
+	{
+
+		// take the angles of the vector
+
+		if (cubicMap == NULL)
+		{
+			double latitude = sin(cameraRay.dir[1]);	// -pi/2 to pi/2
+			// scale to 0 to 1
+			latitude = (latitude/M_PI) + 0.5;
+			Colour c (latitude, 0.1 + latitude * 0.3, latitude * 0.2);
+
+			return c;
+		}
+		else
+		{
+			//Colour c;
+
+			//						// get from an image this works
+			//						double u = x;
+			//						double v = y;
+			//						c = cubicMap->m_textures[CubicMap::BOTTOM].read(u, v);
+			//STATUS_MSG("U: " << u << " V: " << v);
+
+			Colour c = cubicMap->hit(cameraRay);
+			return c;
+		}
+
+	}
+	else
+	{
+
+		Vector3D color;
+		//calculate lighting
+		Material *m = intersection.mat;
+		PhongMaterial *mat = dynamic_cast<PhongMaterial*>(m);
+		assert(mat);
+
+		for (std::list<Light*>::const_iterator lightIt = lights.begin(), end = lights.end(); lightIt != end; ++lightIt)
+		{
+			Light * l = *lightIt;
+
+			//diffuse
+			Vector3D lightDir = l->position - intersection.pos;
+			lightDir.normalize();
+
+			//check if light is blocked by shadow
+			Ray lightRay;
+			lightRay.dir = intersection.pos - l->position;
+			lightRay.dir.normalize();
+			lightRay.pos = l->position;
+			bool inShadow = false;
+			const double distanceToLight = (intersection.pos - l->position).length();
+
+
+			Intersection lightIntersection = root->intersect(lightRay);
+			if (lightIntersection.hit)
+			{
+				// check if the intersection happens before intersection.pos plus a buffer
+				if ((lightIntersection.pos - l->position).length() < distanceToLight - 0.001)
 				{
-
-					// take the angles of the vector
-
-					if (cubicMap == NULL)
-					{
-						double latitude = sin(cameraRay.dir[1]);	// -pi/2 to pi/2
-						// scale to 0 to 1
-						latitude = (latitude/M_PI) + 0.5;
-						Colour c (latitude, 0.1 + latitude * 0.3, latitude * 0.2);
-
-						return c;
-					}
-					else
-					{
-						Colour c = cubicMap->hit(cameraRay);
-						return c;
-					}
-
+					inShadow = true;
 				}
-				else
-				{
-
-					Vector3D color;
-					//calculate lighting
-					Material *m = intersection.mat;
-					PhongMaterial *mat = dynamic_cast<PhongMaterial*>(m);
-					assert(mat);
-
-					for (std::list<Light*>::const_iterator lightIt = lights.begin(), end = lights.end(); lightIt != end; ++lightIt)
-					{
-						Light * l = *lightIt;
-
-						//diffuse
-						Vector3D lightDir = l->position - intersection.pos;
-						lightDir.normalize();
-
-						//check if light is blocked by shadow
-						Ray lightRay;
-						lightRay.dir = intersection.pos - l->position;
-						lightRay.dir.normalize();
-						lightRay.pos = l->position;
-						bool inShadow = false;
-						const double distanceToLight = (intersection.pos - l->position).length();
-
-
-						Intersection lightIntersection = root->intersect(lightRay);
-						if (lightIntersection.hit)
-						{
-							// check if the intersection happens before intersection.pos plus a buffer
-							if ((lightIntersection.pos - l->position).length() < distanceToLight - 0.001)
-							{
-								inShadow = true;
-							}
-						}
+			}
 
 
 
-						// Don't process thist light
-						if (inShadow)
-						{
-							// TODO
-							continue;
-						}
+			// Don't process thist light
+			if (inShadow)
+			{
+				// TODO
+				continue;
+			}
 
-						// lambert only cares about the incoming direction of light against the normal
-						// once it hits, the lighting is equal eveywehre
-						// float lambert = (lightRay.dir * n) * coef;
+			// lambert only cares about the incoming direction of light against the normal
+			// once it hits, the lighting is equal eveywehre
+			// float lambert = (lightRay.dir * n) * coef;
 
-						double lambert = (intersection.n.dot(lightDir)) * 1.0;
-						color[0] += lambert * mat->diffuse().R() * l->colour.R();
-						color[1] += lambert * mat->diffuse().G() * l->colour.G();
-						color[2] += lambert * mat->diffuse().B() * l->colour.B();
+			double lambert = (intersection.n.dot(lightDir)) * 1.0;
+			color[0] += lambert * mat->diffuse().R() * l->colour.R();
+			color[1] += lambert * mat->diffuse().G() * l->colour.G();
+			color[2] += lambert * mat->diffuse().B() * l->colour.B();
 
-						// phong
-						double reflect = 2.0 * (lightDir.dot(intersection.n));
-						Vector3D phongDir = lightDir - reflect * intersection.n;
-						double phonCoeff = std::max(phongDir.dot(cameraRay.dir), 0.0);
+			// phong
+			double reflect = 2.0 * (lightDir.dot(intersection.n));
+			Vector3D phongDir = lightDir - reflect * intersection.n;
+			double phonCoeff = std::max(phongDir.dot(cameraRay.dir), 0.0);
 
-						//DEBUG_MSG("phonCoeff " << phonCoeff << " ks " << mat->shininess());
-						phonCoeff = pow(phonCoeff, mat->shininess()) * 1.0;
-						//DEBUG_MSG("final phonCoeff " << phonCoeff );
+			//DEBUG_MSG("phonCoeff " << phonCoeff << " ks " << mat->shininess());
+			phonCoeff = pow(phonCoeff, mat->shininess()) * 1.0;
+			//DEBUG_MSG("final phonCoeff " << phonCoeff );
 
-						color[0] += phonCoeff * mat->specular().R() * l->colour.R();
-						color[1] += phonCoeff * mat->specular().G() * l->colour.G();
-						color[2] += phonCoeff * mat->specular().B() * l->colour.B();
+			color[0] += phonCoeff * mat->specular().R() * l->colour.R();
+			color[1] += phonCoeff * mat->specular().G() * l->colour.G();
+			color[2] += phonCoeff * mat->specular().B() * l->colour.B();
 
-						DEBUG_MSG("phonCoeff " << phonCoeff << " Lambert: " << lambert);
-					}
+			DEBUG_MSG("phonCoeff " << phonCoeff << " Lambert: " << lambert);
+		}
 
-					//ambient
-					color[0] += mat->diffuse().R() * ambient.R();
-					color[1] += mat->diffuse().G() * ambient.G();
-					color[2] += mat->diffuse().B() * ambient.B();
+		//ambient
+		color[0] += mat->diffuse().R() * ambient.R();
+		color[1] += mat->diffuse().G() * ambient.G();
+		color[2] += mat->diffuse().B() * ambient.B();
 
-					DEBUG_MSG("x" << x << " y:" << y << " " << color);
+		DEBUG_MSG("x" << x << " y:" << y << " " << color);
 
-					//Colour c (latitude, 0.1 + latitude * 0.3, latitude * 0.2);
+		//Colour c (latitude, 0.1 + latitude * 0.3, latitude * 0.2);
 
-					Colour c(color[0]/2, color[1]/2, color[2]/2);
-					return c;
+		Colour c(color[0]/2, color[1]/2, color[2]/2);
+		return c;
 
-				}
+	}
 
 
 }
+
+
 
 void a4_render_helper(
 		int rowModulo, int rowDivisor,
@@ -264,7 +280,7 @@ void a4_render_helper(
 								+ ((myY) / (double(height)) * 2 - 1) * tan(fov_radius) * -(m_up) ;
 						cameraRay.dir.normalize();
 
-						Colour c = cast_ray(cameraRay, root, ambient, lights, cubicMap);
+						Colour c = cast_ray(((double)x)/width, ((double)y)/height, cameraRay, root, ambient, lights, cubicMap);
 						averageColour = averageColour + c;
 					}
 				}
@@ -286,7 +302,7 @@ void a4_render_helper(
 						+ ((y) / (double(height)) * 2 - 1) * tan(fov_radius) * -(m_up) ;
 				cameraRay.dir.normalize();
 
-				Colour pixelColour = cast_ray(cameraRay, root, ambient, lights, cubicMap);
+				Colour pixelColour = cast_ray(((double)x)/width, ((double)y)/height, cameraRay, root, ambient, lights, cubicMap);
 
 				img(x, y, 0) = pixelColour.R();
 				img(x, y, 1) = pixelColour.G();
@@ -470,6 +486,8 @@ void a4_render(
 	STATUS_MSG("Saving edge image to " << edgeFilename);
 	img.savePng(edgeFilename);
 
+	if (DO_SUPERSAMPLE)
+	{
 	// do the 2nd pass
 	for (t = 0; t < NUM_THREADS; t++)
 	{
@@ -518,6 +536,7 @@ void a4_render(
 			exit(-1);
 		}
 		printf("Main: completed join with thread %ld having a status of %ld\n",t,(long)status);
+	}
 	}
 
 	// release attr
