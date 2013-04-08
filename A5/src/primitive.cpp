@@ -1,6 +1,7 @@
 #include "primitive.hpp"
 #include <vector>
-
+#include <math.h>
+#include "debug.hpp"
 #include "mesh.hpp"
 Primitive::~Primitive()
 {
@@ -152,4 +153,165 @@ Intersection NonhierBox::intersect(Ray ray) {
 	// intersect like mesh
 
 	return m_mesh->intersect(ray);
+}
+
+
+
+NonhierFractal::~NonhierFractal()
+{
+
+}
+NonhierFractal::NonhierFractal(const Point3D& pos, double size)
+    : m_pos(pos), m_size(size)
+{
+
+
+}
+/*
+ * uniform int Iterations;  slider[0,9,100]
+
+// Mandelbulb exponent (8 is standard)
+uniform float Power; slider[-10,8,10]
+
+// Bailout radius
+uniform float Bailout; slider[0,5,30]
+
+uniform vec3 RotVector; slider[(0,0,0),(1,1,1),(1,1,1)]
+
+uniform float RotAngle; slider[0.00,0,180]
+
+uniform bool Julia; checkbox[false]
+uniform vec3 JuliaC; slider[(-2,-2,-2),(0,0,0),(2,2,2)]
+ */
+
+const float Power = 8.0;
+
+void powN2(Vector3D &z, double zr0) {
+	float zo0 = asin( z[2]/zr0 );
+	float zi0 = atan2( z[1],z[0] );
+	float zr = pow( zr0, Power-1.0 );
+	float zo = zo0 * Power;
+	float zi = zi0 * Power;
+	zr *= zr0;
+	z  = zr*Vector3D( cos(zo)*cos(zi), cos(zo)*sin(zi), sin(zo) );
+}
+
+bool inside(Vector3D pos) {
+	const float Bailout = 10;
+	const int Iterations = 50;
+	const bool Julia = false;
+	const Vector3D JuliaC(0,0,0);
+	Vector3D z=pos;
+	double r;
+	int i=0;
+	r=z.length();
+
+	while(r<Bailout && (i<Iterations)) {
+		powN2(z,r);
+		z = z + (Julia ? JuliaC : pos);
+		r=z.length();
+		i++;
+	}
+	return (r<Bailout);
+
+}
+const int Samples = 2000;
+double closest = 1.0;
+/*
+ *
+Near = 0.7368
+Far = 2.45904
+ */
+const double Far = 5.0;
+const double Near = 0.0;
+
+
+Intersection fractalIntersect(Ray ray)
+{
+	Intersection intersection;
+
+	intersection.hit = false;
+
+
+	// evaluate without a distance estimator
+	for (int i=0; i<Samples; i++) {
+		float randf = (float)rand()/(float)RAND_MAX;
+		double t = Near+ (Far - Near) * randf* closest;
+
+
+		Vector3D point = ray.pos + t* ray.dir;
+		//STATUS_MSG("Point: " << point);
+		if (inside(point)) {
+			//STATUS_MSG("HIT INSIDE POINT");
+			closest = t;
+			intersection.t = t;
+
+			intersection.pos = Point3D(point[0], point[1], point[2]);
+			intersection.hit = true;
+			intersection.n = Vector3D(0,0,1);
+		}
+	}
+
+	return intersection;
+}
+
+
+Intersection NonhierFractal::intersect(Ray ray) {
+	Intersection intersection;
+
+	intersection.hit = false;
+
+
+
+
+	intersection = fractalIntersect(ray);
+
+	if (intersection.hit) {
+		// calculate normal vector
+
+		// intersect two points around it, then do a cross product
+		Ray xRay = ray;
+		xRay.pos[0] += 0.00001;
+
+		Intersection intersectX = fractalIntersect(xRay);
+
+
+		Ray yRay = ray;
+		yRay.pos[1] += 0.00001;
+
+		Intersection intersectY = fractalIntersect(yRay);
+
+		if (intersectX.hit && intersectY.hit) {
+			Vector3D dx = intersectX.pos - intersection.pos;
+			Vector3D dy = intersectY.pos -intersection.pos;
+			intersection.n = cross(dy, dx);
+			intersection.n.normalize();
+			//STATUS_MSG("good");
+
+		}
+		else
+		{
+			//STATUS_MSG("edge?");
+		}
+	}
+
+	// Hit position in world space.
+//	Vector3D worldPos = Eye + (Near+tex.w*(Far-Near)) * rayDir;
+
+//	vec3 n = normalize(cross(dFdx(worldPos), dFdy(worldPos)));
+//
+//
+//	intersection.t = t;
+//	intersection.hit = true;
+//	intersection.pos = ray.pos + ray.dir * t;
+//	intersection.n = intersection.pos - m_pos;
+//	intersection.n.normalize();
+
+
+
+	return intersection;
+
+
+
+
 }

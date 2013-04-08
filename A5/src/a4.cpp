@@ -11,7 +11,7 @@
 //#define NUM_THREADS	1 //8
 #define NUM_THREADS	8
 
-const bool DO_SUPERSAMPLE = false;
+const bool DO_SUPERSAMPLE = true;
 
 //using namespace std;
 

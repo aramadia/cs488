@@ -3,6 +3,7 @@
 mat1 = gr.material({0.7, 1.0, 0.7}, {0.5, 0.7, 0.5}, 25)
 mat2 = gr.material({0.5, 0.5, 0.5}, {0.5, 0.7, 0.5}, 25)
 mat3 = gr.material({1.0, 0.6, 0.1}, {0.5, 0.7, 0.5}, 25)
+mat4 = gr.material({1.0, 1.0, 1.0}, {0.5, 0.7, 0.5}, 25)
 
 scene_root = gr.node('root')
 scene_root:rotate('X', 45)
@@ -13,12 +14,20 @@ for x = -3,3 do
 		scene_root:add_child(s1)
 		s1:set_material(mat1)		
 
+		-- instead of nh_box
 		b1 = gr.nh_box('b1', {x * 75, y * 75, 0}, 20)
 		scene_root:add_child(b1)
 		b1:set_material(mat3)
 
+
+
  	end
 end
+
+
+f1 = gr.nh_fractal('b1', {0, 0, 0}, 100)
+scene_root:add_child(f1)
+f1:set_material(mat4)
 
 
 
@@ -31,5 +40,5 @@ orange_light = gr.light({400.0, 100.0, 150.0}, {0.7, 0.0, 0.7}, {1, 0, 0})
 
 -- fov default = 50
 gr.render(scene_root, 'fast.png', 400, 400, 
-	  {0, 0, 800}, {3, 2, -5}, {0, 1, 0}, 120,
+	  {0, 0, 2}, {0, 0, -1}, {0, 1, 0}, 60,
 	  {0.3, 0.3, 0.3}, {white_light, orange_light})

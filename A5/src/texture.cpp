@@ -29,6 +29,7 @@ void Texture::loadFile(std::string filename) {
 }
 
 // Map [u,v] of range [0,1] to [width, height]
+// Does bilinear interpolation.  Also clamps
 Colour Texture::read(double u, double v) const
 {
 	const int width = m_image.width();
@@ -48,14 +49,21 @@ Colour Texture::read(double u, double v) const
 	vmin = min(max(vmin, 0), height-1);
 	vmax = min(max(vmax, 0), height - 1);
 
-	Colour cmin = m_image(umin, vmin);
-	Colour cmax = m_image(umax, vmax);
+	// 4 samples on square
+	Colour p0 = m_image(umin, vmin);
+	Colour p1 = m_image(umin, vmax);
+	Colour p2 = m_image(umax, vmin);
+	Colour p3 = m_image(umax, vmax);
 
 	double uD = width * u - umin;
 	double vD = height * v - vmin;
 
-	// TODO, do 4 point interpolation
-	return cmin;
+	Colour finalColour = vD * (uD * p0 + (1.0 - uD) * p1) +	// top points
+			//bottom points
+			(1.0 - vD) * (uD * p2 + (1.0 - uD) * p3);
+
+	//  do 4 point interpolation
+	return finalColour;
 
 
 

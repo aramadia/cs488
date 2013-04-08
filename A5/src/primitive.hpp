@@ -42,6 +42,20 @@ private:
   Mesh *m_mesh;
 };
 
+
+// Box is really a mesh
+class NonhierFractal : public Primitive {
+public:
+	NonhierFractal(const Point3D& pos, double size);
+
+  virtual ~NonhierFractal();
+  virtual Intersection intersect(Ray ray);
+
+private:
+  Point3D m_pos;
+  double m_size;
+};
+
 class Sphere : public Primitive {
 public:
 	Sphere();
