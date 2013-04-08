@@ -11,7 +11,7 @@
 //#define NUM_THREADS	1 //8
 #define NUM_THREADS	8
 
-const bool DO_SUPERSAMPLE = true;
+const bool DO_SUPERSAMPLE = false;
 
 //using namespace std;
 
@@ -442,6 +442,8 @@ void a4_render(
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			detectEdge[x][y] = false;
+			// force supersampling
+			//detectEdge[x][y] = true;
 		}
 	}
 
